@@ -403,5 +403,27 @@ WHERE fi.player_out = player.player_id
 ORDER BY fi.duck_out DESC , player.player_name;
 
 --21--
+SELECT final.match_id, t1.team_name as team_1_name, t3.team_name as team_2_name, t3.team_name as match_winner_name, final.num_of_boundaries
+FROM
+    (SELECT table2.match_id, table1.team_1, table1.team_2, table1.match_winner, table2.num_of_boundaries
+    FROM
+        (SELECT m.match_id, m.team_1, m.team_2, m.match_winner
+        FROM match as m 
+                JOIN win_by as wb on m.win_id = wb.win_id
+        WHERE wb.win_id = "wickets"
+        )as table1
+        JOIN
+        (SELECT bbb.match_id , bbb.team_batting , COUNT(bs.runs_scored) as num_of_boundaries
+        FROM ball_by_ball as bbb NATURAL JOIN batsman_scored as bs
+        WHERE bs.runs_scored IN (4,6) AND innings_no IN (1,2)
+        GROUP BY bbb.match_id , bbb.team_batting
+        ) as table2 ON table1.match_id = table2.team_batting
+                    AND table1.match_winner = table2.team_batting
+    )as final, team as t1, team as t2, team as t3
+WHERE final.team_1 = t1.team_id
+        AND final.team_2 = t2.team_id
+        AND final.match_winner = t3.team_id
+ORDER BY final.num_of_boundaries, t3.team_name, t1.team_name, t2.team_name
+LIMIT 3;
 
 --22--
