@@ -461,9 +461,9 @@ FROM
         )AS table1
         JOIN
         (SELECT match.season_id, bbb.bowler, COUNT(wt.player_out) as wickets
-        FROM ball_by_ball as bbb NATURAL JOIN wicket_taken aswt
+        FROM ball_by_ball as bbb NATURAL JOIN wicket_taken as wt
                 JOIN match on match.match_id = bbb.match_id
-        WHERE innings_no in (1,2)
+        WHERE innings_no in (1,2) AND wt.kind_out NOT IN(3,5,9)
         GROUP BY match.season_id, bbb.bowler
         HAVING COUNT(wt.player_out) >0
         )AS table2 ON table1.season_id = table2.season_id
@@ -471,4 +471,5 @@ FROM
         JOIN player ON player.player_id = table1.bowler
         JOIN country ON player.country_id = country.country_id
     )as foo
-ORDER BY arc ,foo.player_name
+ORDER BY foo.arc ,foo.player_name
+LIMIT 3;
