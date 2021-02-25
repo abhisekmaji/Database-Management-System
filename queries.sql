@@ -433,3 +433,27 @@ ORDER BY final.num_of_boundaries, t3.team_name, t1.team_name, t2.team_name
 LIMIT 3;
 
 --22--
+SELECT foo.country_name
+FROM
+    (SELECT ROUND(table1.runs_conceeded/table2.wickets,2) as arc, 
+            country.country_name, player.player_name
+    FROM
+        (SELECT match.season_id, bbb.bowler, SUM(bs.runs_scored) as runs_conceeded
+        FROM ball_by_ball as bbb NATURAL JOIN batsman_scored as bs
+                JOIN match on match.match_id = bbb.match_id
+        WHERE innings_no in (1,2)
+        GROUP BY match.season_id, bbb.bowler
+        )AS table1
+        JOIN
+        (SELECT match.season_id, bbb.bowler, COUNT(wt.player_out) as wickets
+        FROM ball_by_ball as bbb NATURAL JOIN wicket_taken aswt
+                JOIN match on match.match_id = bbb.match_id
+        WHERE innings_no in (1,2)
+        GROUP BY match.season_id, bbb.bowler
+        HAVING COUNT(wt.player_out) >0
+        )AS table2 ON table1.season_id = table2.season_id
+                    AND table1.bowler = table2.bowler
+        JOIN player ON player.player_id = table1.bowler
+        JOIN country ON player.country_id = country.country_id
+    )as foo
+ORDER BY arc ,foo.player_name
