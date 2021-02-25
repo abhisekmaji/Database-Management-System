@@ -3,7 +3,7 @@ SELECT match_id,player_name,team_name,num_wickets
 FROM 
     (SELECT match_id, bowler, team_bowling, COUNT(player_out) AS num_wickets
     FROM ball_by_ball NATURAL JOIN wicket_taken
-    WHERE kind_out NOT IN (3,5,9) AND innings_no = (1,2)
+    WHERE kind_out NOT IN (3,5,9) AND innings_no in (1,2)
     GROUP BY match_id, bowler, team_bowling
     HAVING COUNT(player_out) >= 5
     ) AS a, player, team
@@ -16,27 +16,26 @@ FROM
     (SELECT player_match.player_id, COUNT(player_match.match_id) as num_matches
     FROM player_match INNER JOIN match
         ON  player_match.match_id = match.match_id AND
-            player_match.man_of_the_match = match.player_id
+            match.man_of_the_match = player_match.player_id
     WHERE NOT player_match.team_id = match.match_winner
-    GROUP BY player_match.player_id ) as a, player
-WHERE player.player_id = a.player_id
-ORDER BY a.num_matches DESC, player_name;
+    GROUP BY player_match.player_id 
+    ) as a
+    JOIN player ON player.player_id = a.player_id
+ORDER BY a.num_matches DESC, player_name
 LIMIT 3;
 
 --3--
 SELECT player_name
 FROM 
-    (SELECT fielders, COUNT(player_out) as num_catches
-    FROM match NATURAL JOIN wicket_taken
-    WHERE season_id =(SELECT season_id
-                    FROM season
-                    WHERE season_year=2012) 
-        AND innings_no in (1,2)
-        AND kind_out in (SELECT out_id
-                        FROM out_type
-                        WHERE out_name = 'catch')  
-    GROUP BY fielders) as f, player
-WHERE player.player_id = f.fielders
+    (SELECT wt.fielders, COUNT(wt.player_out) as num_catches
+    FROM ball_by_ball as bbb NATURAL JOIN wicket_taken as wt
+            JOIN match ON match.match_id = bbb.match_id
+            JOIN season ON season.season_id = match.season_id
+            JOIN out_type ON out_type.out_id = wt.kind_out
+    WHERE season_year = 2012 AND out_name = 'caught'  
+    GROUP BY wt.fielders
+    ) as f
+    JOIN player ON player.player_id = f.fielders
 ORDER BY f.num_catches DESC, player_name
 LIMIT 1;
 
@@ -52,16 +51,18 @@ FROM
 ORDER BY g.season_year;
 
 --5--
-SELECT player_name
+SELECT DISTINCT player_name
 FROM 
-    (SELECT striker
+    (SELECT table1.striker
     FROM 
-        (SELECT match_id, striker, team_batting , SUM(runs_scored)
+        (SELECT match_id, striker, team_batting , SUM(runs_scored) as vain
         FROM ball_by_ball NATURAL JOIN batsman_scored
         WHERE innings_no in (1,2)
         GROUP BY match_id , striker , team_batting
-        HAVING SUM(runs_scored) > 50) NATURAL JOIN match
-    WHERE NOT team_batting = match_winner) NATURAL JOIN player
+        HAVING SUM(runs_scored) > 50
+        ) as table1 NATURAL JOIN match
+    WHERE NOT table1.team_batting = match.match_winner
+    )as f JOIN player ON f.striker = player.player_id
 ORDER BY player_name;
 
 --6--
@@ -69,28 +70,27 @@ SELECT h.season_year , h.team_name , h.rank
 FROM
     (SELECT team_name, g.season_year,
             row_number() OVER (PARTITION BY season_year 
-                    ORDER BY g.count_left_foreign_players DESC, g.team_name) as rank
+                    ORDER BY g.count_left_foreign_players DESC, team_name) as rank
     FROM 
-        (SELECT team_id , season_year, COUNT(player_id) as count_left_foreign_players
+        (SELECT fn.team_id , fn.season_year, COUNT(player_id) as count_left_foreign_players
         FROM 
-            (SELECT player_id, season_year, team_id
+            (SELECT player_id, f.season_year, team_id
             FROM 
                 (SELECT match_id, season_year
                 FROM match NATURAL JOIN season
                 ) as f 
                     NATURAL JOIN player_match
-            GROUP BY player_id, season_year, team_id) NATURAL JOIN player
-        WHERE batting_hand IN (SELECT batting_id
-                                FROM batting_style
-                                WHERE batting_skill = 'left')
-            AND country_id NOT IN (SELECT country_id
-                                    FROM country
-                                    WHERE country_name = 'india')
-        GROUP BY team_id, season_year
+            GROUP BY player_id, f.season_year, team_id
+            )as fn NATURAL JOIN player
+            JOIN batting_style ON batting_style.batting_id = player.batting_hand
+            JOIN country ON country.country_id = player.country_id
+        WHERE NOT country.country_name = 'India'
+            AND batting_style.batting_hand = 'Left-hand bat'
+        GROUP BY fn.team_id, fn.season_year
         )as g NATURAL JOIN team
     ) as h
 WHERE h.rank <= 5
-ORDER BY season_year, h.rank DESC;
+ORDER BY season_year, h.rank;
 
 --7--
 SELECT team_name 
@@ -101,51 +101,56 @@ FROM
         AND season_id IN (SELECT season_id
                             FROM season
                             WHERE season_year = 2009 )
-    GROUP BY match_winner,season_id), team
-WHERE team_id = match_winner
+    GROUP BY match_winner,season_id
+    )as table1 JOIN team ON team.team_id = table1.match_winner
 ORDER BY wins DESC, team_name;
 
 --8--
-SELECT team_name, player_name, runs
+SELECT team_name, player_name, runs_player as runs
 FROM
-    (SELECT team_id, player_id,team_name, player_name, max(runs_player) as runs 
+    (SELECT team_id, player_id,team_name, player_name, runs_player,
+        row_number() over(partition by team_id order by runs_player DESC) as rn 
     FROM 
         (SELECT team_id, player_id, team_name, player_name, SUM(runs_match) as runs_player
         FROM 
-            (
-                SELECT team_batting, striker, match_id, SUM(runs_scored) as runs_match
-                FROM ball_by_ball NATURAL JOIN batsman_scored
-                WHERE innings_no in (1,2)
-                GROUP BY team_batting, striker, match_id
-            ), team,player
-        WHERE team_id = team_batting AND player_id = striker
-            AND match_id in (
-                        SELECT match_id, season_id
+            (SELECT team_batting, striker, match_id, SUM(runs_scored) as runs_match
+            FROM ball_by_ball NATURAL JOIN batsman_scored
+            WHERE innings_no in (1,2)
+            GROUP BY team_batting, striker, match_id
+            )as f 
+                JOIN team ON team.team_id=f.team_batting
+                JOIN player ON player.player_id = f.striker
+        WHERE match_id in (
+                        SELECT match_id
                         FROM match NATURAL JOIN season
                         WHERE season_year = 2010
                     )
-        GROUP BY team_id, player_id, team_name, player_name)
-    GROUP BY team_id, player_id,team_name, player_name)
+        GROUP BY team_id, player_id, team_name, player_name
+        ) as fs
+    )as fss
+WHERE rn =1
 ORDER BY team_name, player_name;
 
 --9--
-SELECT a.team_name, b.team_name as opponent_team_name, number_of_sixes as [number of sixes]
+SELECT a.team_name, b.team_name as opponent_team_name, number_of_sixes as "number of sixes"
 FROM (SELECT team_batting, team_bowling, number_of_sixes
     FROM
         (
-            SELECT team_batting, team_bowling, match_id, COUNT(players) as number_of_sixes
-            FROM ball_by_ball NATURAL JOIN batsman_scored
-            WHERE innings_no BETWEEN 1 AND 2 AND runs_scored = 6
-            GROUP BY team_batting, team_bowling, match_id
-        ) as f,
+            SELECT bbb.team_batting, bbb.team_bowling, bbb.match_id, COUNT(ball_id) as number_of_sixes
+            FROM ball_by_ball as bbb NATURAL JOIN batsman_scored as bs
+            WHERE bbb.innings_no IN (1,2) 
+                AND bs.runs_scored = 6
+            GROUP BY bbb.team_batting, bbb.team_bowling, bbb.match_id
+        ) as f
+        JOIN
         (
             SELECT match_id, season_id
             FROM match NATURAL JOIN season
             WHERE season_year = 2008
-        ) as g
-    WHERE f.match_id = g.match_id) as h, team as a, team as b
-WHERE h.team_batting = a.team.team_id AND g.team_bowling = b.team_id
-ORDER BY number_of_sixes DESC, team_name
+        ) as g ON f.match_id = g.match_id
+    ) as h, team as a, team as b
+WHERE h.team_batting = a.team_id AND h.team_bowling = b.team_id
+ORDER BY "number of sixes" DESC, team_name
 LIMIT 3;
 
 --10--
@@ -153,11 +158,11 @@ LIMIT 3;
 
 --11--
 SELECT m.season_year, player.player_name, m.num_wickets, m.runs
-FROM(
-    SELECT g.season_id, g.striker as player_id, g.season_year,
-    SUM(runs_match) as runs, sum(wickets_match) as num_wickets, COUNT(g.match_id) 
+FROM
+    (SELECT h.season_id, h.striker, h.season_year,
+    SUM(runs_match) as runs, sum(wickets_match) as num_wickets, COUNT(h.match_id) 
     FROM
-        (SELECT match_id, season_id, season_year, striker, runs_match
+        (SELECT f.match_id, season_id, season_year, striker, runs_match
         FROM
             (
                 SELECT match_id, striker, SUM(runs_scored) as runs_match
@@ -171,7 +176,7 @@ FROM(
             ) as g
         WHERE f.match_id = g.match_id
         ) as h,
-        (SELECT match_id, season_id, season_year, bowler, wickets_match
+        (SELECT i.match_id, season_id, season_year, bowler, wickets_match
         FROM
             (
                 SELECT match_id, bowler, COUNT(player_out) as wickets_match
@@ -186,35 +191,36 @@ FROM(
             ) as j
         WHERE i.match_id = j.match_id
         ) as k
-    WHERE g.match_id = k.match_id and g.striker = k.bowler
-    GROUP BY g.season_id, g.striker, g.season_year
-    HAVING SUM(runs_match)>=150 AND sum(wickets_match)>=5 AND COUNT(match_id)>=10
-    ) as m,
-    player, batting_style
-WHERE player.player_id = m.player_id 
-    AND batting_style.batting_id = player.batting_hand 
-    AND batting_style.batting_skill = 'left'
-ORDER BY m.num_wickets DESC, m.runs DESC, player.player_name, season_year;
+    WHERE h.match_id = k.match_id and h.striker = k.bowler
+    GROUP BY h.season_id, h.striker, h.season_year
+    HAVING SUM(h.runs_match)>=150 AND sum(k.wickets_match)>=5 AND COUNT(h.match_id)>=10
+    ) as m 
+        JOIN player ON player.player_id = m.striker
+        JOIN batting_style ON batting_style.batting_id = player.batting_hand
+                            AND batting_style.batting_hand = 'Left-hand bat'
+ORDER BY m.num_wickets DESC, m.runs DESC, player.player_name, m.season_year;
 
 --12--
 SELECT match_id, player_name, team_name, num_wickets, season_year
 FROM
-    (SELECT pg.match_id, pg.player_name, pg.team_name, pg.season_year , pg.num_wickets
+    (SELECT pg.match_id, pg.player_name, pg.team_name, pg.season_year , pg.num_wickets,
         row_number() OVER(PARTITION BY pg.season_year ORDER BY pg.num_wickets DESC) as rnk
     FROM
-        (SELECT f.match_id, player_name, team.team_name, match.season_year , f.num_wickets
+        (SELECT f.match_id, player_name, team.team_name, season.season_year , f.num_wickets,
                 row_number() over(partition by f.match_id ORDER BY f.num_wickets DESC) as rn
         FROM
-            (SELECT match_id, bowler team_bowling, COUNT(player_out) as num_wickets
+            (SELECT match_id, bowler, team_bowling, COUNT(player_out) as num_wickets
             FROM ball_by_ball NATURAL JOIN wicket_taken
             WHERE kind_out NOT IN (3,5,9) AND innings_no in (1,2)
             GROUP BY match_id , bowler, team_bowling
             ) as f 
                 JOIN team ON team.team_id = f.team_bowling
                 JOIN player on player.player_id = f.bowler
-                JOIN match on match.match_id = f.match_id 
+                JOIN match on match.match_id = f.match_id
+                JOIN season on season.season_id= match.season_id 
         )as pg
-    WHERE rn = 1)
+    WHERE rn = 1
+    )as final
 WHERE rnk = 1
 ORDER BY num_wickets DESC, player_name;
 
