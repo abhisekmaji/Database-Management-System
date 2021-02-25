@@ -241,41 +241,48 @@ WHERE f.season_played = s.total_seasons AND player.player_id = f.player_id
 ORDER BY player.player_name;
 
 --14--
-SELECT f.season_year, f.match_id, f.team_name
+SELECT t.season_year, t.match_id, t.team_name
 FROM 
-    (SELECT season.season_year , x.match_id , team.team_name , x.req_players
+    (SELECT season.season_year , x.match_id , team.team_name , x.req_players,
         row_number() over(
             partition by season.season_year ORDER BY x.req_players DESC) AS  team_rank
     FROM    
-        (SELECT f.season_id , f.match_id , f.team_batting ,
+        (SELECT m.season_id , f.match_id , f.team_batting ,
                 COUNT(fifty_plus) as req_players
         FROM
             (SELECT b.match_id , b.innings_no , b.team_batting , 
                     b.striker , SUM(s.runs_scored) as fifty_plus
             FROM ball_by_ball as b NATURAL JOIN batsman_scored as s
-            WHERE b.innings_no BETWEEN 1 AND 2
+            WHERE b.innings_no IN (1,2)
             GROUP by b.match_id , b.innings_no , b.striker, b.team_batting
-            HAVING SUM(runs_scored) >= 50) as f, match as m
-        WHERE m.match_id = f.match_id
-        GROUP BY f.season_id , f.match_id , f.team_batting
-        ) as x, team, season
-    WHERE team.team_id = x.team_batting 
-        AND season.season_id = x.season_id
+            HAVING SUM(runs_scored) >= 50
+            ) as f 
+            JOIN 
+            (SELECT match_id, match_winner, season_id
+            FROM match 
+            WHERE match_winner is NOT NULL
+            )as m ON m.match_id = f.match_id
+        WHERE f.team_batting = m.match_winner
+        GROUP BY m.season_id , f.match_id , f.team_batting
+        ) as x 
+            JOIN team ON team.team_id = x.team_batting
+            JOIN season ON team.team_id = x.team_batting 
+                    AND season.season_id = x.season_id
     ) as t
 WHERE t.team_rank <=3
 ORDER BY t.season_year, t.req_players DESC, t.team_name;
 
 --15--
-SELECT season_year, top_batsman, max_runs, top_bowler, max_wickets
+SELECT table1.season_year, top_batsman, max_runs, top_bowler, max_wickets
 FROM
     (SELECT season_year, season_id, player_name as top_batsman, max_runs
     FROM
         (SELECT season.season_year , season.season_id, player.player_name,
                 bat.max_runs,
-                row_number() ORDER BY(PARTITION BY season.season_id 
+                row_number() OVER(PARTITION BY season.season_id 
                 ORDER BY bat.max_runs DESC, player.player_name) as rn
         FROM 
-            (SELECT f.striker, match.season_id, SUM(f.runs_scored) as max_runs
+            (SELECT f.striker, match.season_id, SUM(f.runs_match) as max_runs
             FROM
                 (SELECT match_id , striker , sum(runs_scored) as runs_match
                 FROM ball_by_ball NATURAL JOIN batsman_scored
@@ -287,7 +294,7 @@ FROM
             ) as bat
             JOIN season ON season.season_id = bat.season_id
             JOIN player ON player.player_id = bat.striker
-        )
+        ) as fs1
     WHERE rn = 2
     )as table1
     JOIN
@@ -295,7 +302,7 @@ FROM
     FROM
         (SELECT season.season_year , season.season_id, player.player_name,
                 ball.max_wickets,
-                row_number() ORDER BY(PARTITION BY season.season_id 
+                row_number() over(PARTITION BY season.season_id 
                 ORDER BY ball.max_wickets DESC, player.player_name) as rnk
         FROM 
             (SELECT f.bowler, match.season_id, SUM(wicket_match) as max_wickets
@@ -310,47 +317,54 @@ FROM
             ) as ball
             JOIN season ON season.season_id = ball.season_id
             JOIN player ON player.player_id = ball.bowler
-        )
+        ) as fs2
     WHERE rnk = 2
     )as table2 
     ON table2.season_id = table1.season_id
 ORDER BY season_year;
 
 --16--
-SELECT team.team_name
+SELECT f.team_name
 FROM
-    (SELECT match.outcome_id , COUNT(match.match_id) as num_win
-    FROM match NATURAL JOIN season
+    (SELECT t3.team_name , COUNT(m.match_id) as num_win
+    FROM(SELECT *
+        FROM match
+        WHERE match.match_winner IS NOT NULL
+        ) as m 
+            NATURAL JOIN season
+            JOIN team as t1 ON t1.team_id = team_1
+            JOIN team as t2 ON t2.team_id = team_2
+            JOIN team as t3 ON t3.team_id = match_winner
     WHERE season.season_year = 2008 
-        AND match.outcome_id IS NOT NULL 
-        AND (team_1 = 'Royal Challengers Bangalore' 
-                OR match.team_2 = 'Royal Challengers Bangalore')
-    GROUP BY match.outcome_id
+        AND NOT t3.team_name = 'Royal Challengers Bangalore' 
+        AND (t1.team_name = 'Royal Challengers Bangalore' 
+                OR t2.team_name = 'Royal Challengers Bangalore')
+    GROUP BY t3.team_name 
     ) as f 
-    JOIN team ON f.outcome_id = team.team_id
-ORDER BY f.num_win DESC, team.team_name;
+ORDER BY f.num_win DESC, f.team_name;
 
 --17--
-SELECT f.team_name, f.player_name, f.count
+SELECT f.team_name, f.player_name, f.num_man as count
 FROM
-    (SELECT player.player_name, team.team_name, pf.num_man
-            row_number() over(partition by(pf.player_id) ORDER BY pf.num_man DESC) as rn
+    (SELECT player.player_name, team.team_name, pf.num_man,
+            row_number() over(partition by team.team_name ORDER BY pf.num_man DESC,player.player_name) as rn
     FROM 
-        (SELECT player.player_id , player.team_id , COUNT(mp.match_id) as num_man
+        (SELECT pm.player_id , pm.team_id , COUNT(mp.match_id) as num_man
         FROM
             (SELECT match_id , man_of_the_match
             FROM match
-            WHERE man_of_the_match is not NULL) as mp,
-            INNER JOIN player_match 
-            ON mp.match_id = player_match.match_id 
-                AND mp.man_of_the_match = player.player_id
-        GROUP BY player.player_id , player.team_id
+            WHERE man_of_the_match is not NULL
+            ) as mp
+            JOIN player_match as pm
+                ON mp.match_id = pm.match_id 
+                AND mp.man_of_the_match = pm.player_id
+        GROUP BY pm.player_id , pm.team_id
         ) as pf 
-        JOIN team on pf.team_id = team..team_id 
+        JOIN team on pf.team_id = team.team_id 
         JOIN player on pf.player_id = player.player_id
     ) as f
 WHERE rn = 1
-ORDER BY f.team_name, f.player_name;
+ORDER BY f.team_name;
 
 --18--
 SELECT player_name
@@ -395,18 +409,19 @@ FROM
 ORDER BY team.team_name, f.avg_runs;
 
 --20--
-SELECT player.player_name
+SELECT player.player_name , fi.duck_out
 FROM
     (SELECT f.player_out , count(f.match_id) as duck_out
     FROM
         (SELECT bbb.match_id , wt.player_out
         FROM ball_by_ball AS bbb NATURAL JOIN wicket_taken as wt
-        WHERE bbb.over_id = 0 AND wt.player_out IS NOT NULL
+        WHERE bbb.over_id = 1
                 AND wt.innings_no IN (1,2)
         )as f
-    GROUP BY f.player_out ) as fi , player
-WHERE fi.player_out = player.player_id
-ORDER BY fi.duck_out DESC , player.player_name;
+    GROUP BY f.player_out
+    ) as fi JOIN player ON fi.player_out = player.player_id
+ORDER BY fi.duck_out DESC , player.player_name
+LIMIT 10;
 
 --21--
 SELECT final.match_id, t1.team_name as team_1_name, t3.team_name as team_2_name, t3.team_name as match_winner_name, final.num_of_boundaries
@@ -416,14 +431,14 @@ FROM
         (SELECT m.match_id, m.team_1, m.team_2, m.match_winner
         FROM match as m 
                 JOIN win_by as wb on m.win_id = wb.win_id
-        WHERE wb.win_id = "wickets"
+        WHERE wb.win_type = 'wickets'
         )as table1
         JOIN
         (SELECT bbb.match_id , bbb.team_batting , COUNT(bs.runs_scored) as num_of_boundaries
         FROM ball_by_ball as bbb NATURAL JOIN batsman_scored as bs
         WHERE bs.runs_scored IN (4,6) AND innings_no IN (1,2)
         GROUP BY bbb.match_id , bbb.team_batting
-        ) as table2 ON table1.match_id = table2.team_batting
+        )as table2 ON table1.match_id = table2.match_id
                     AND table1.match_winner = table2.team_batting
     )as final, team as t1, team as t2, team as t3
 WHERE final.team_1 = t1.team_id
