@@ -154,7 +154,40 @@ ORDER BY "number of sixes" DESC, team_name
 LIMIT 3;
 
 --10--
+SELECT final.bowling_skill as bowling_category, final.player_name, final.avg_runs as batting_average
+FROM
+    (SELECT table2.bowling_id, table2.bowling_skill, table4.avg_runs, table4.player_name,
+            row_number() OVER(PARTITION BY table2.bowling_id ORDER BY table4.avg_runs DESC) as rn
+    FROM
+        (SELECT table1.bowling_id, table1.bowling_skill, ROUND(AVG(table1.all_wickets),2) as avg_category
+        FROM
+            (SELECT bs.bowling_id, player.player_id, bs.bowling_skill, COUNT(wt.player_out) as all_wickets  
+            FROM ball_by_ball as bbb NATURAL JOIN wicket_taken as wt
+                    JOIN player on player.player_id=bbb.bowler
+                    JOIN bowling_style as bs ON bs.bowling_id=player.bowling_skill
+            WHERE wt.kind_out NOT IN (3,5,9)
+                    AND innings_no IN (1,2)
+            GROUP BY bs.bowling_id, player.player_id, bs.bowling_skill
+            HAVING COUNT(wt.player_out) > 0
+            )as table1
+        GROUP BY table1.bowling_id
+        )as table2
 
+        JOIN
+
+        (SELECT table3.striker, player.bowling_id, player.player_name, ROUND(AVG(table3.tot_runs),2) as avg_runs
+        FROM
+            (SELECT bbb.striker, bbb.match_id, SUM(bs.runs_scored) as tot_runs
+            FROM ball_by_ball as bbb NATURAL JOIN batsman_scored as bs
+            WHERE bbb.innings_no IN (1,2)
+            GROUP BY bbb.striker, bbb.match_id
+            ) as table3 JOIN player ON player.player_id = table3.striker
+        WHERE player.bowling_skill IS NOT NULL
+        GROUP BY table3.striker, player.bowling_id, player.player_name
+        )as table4 ON table2.bowling_id = table4.bowling_id
+    WHERE table4.avg_runs > table2.avg_category
+    )as final
+WHERE rn=1;
 
 --11--
 SELECT m.season_year, player.player_name, m.num_wickets, m.runs
@@ -374,17 +407,19 @@ FROM
         (SELECT player_id , COUNT(team_id) as num_team
         FROM player_match 
         GROUP BY player_id
-        HAVING COUNT(team_id) >= 3) as f
+        HAVING COUNT(team_id) >= 3
+        ) AS f
         JOIN
         (SELECT over_id , bowler , SUM(runs_scored) as runs_conceeded
         FROM ball_by_ball 
-            NATURAL JOIN wicket_taken 
             NATURAL JOIN batsman_scored
         GROUP BY over_id , bowler 
-        HAVING SUM(runs_scored) >= 20) as g
-        ON f.player_id = g.bowler
-    GROUP BY f.player_id) as h, player
-WHERE h.player_id = player.player_id
+        HAVING SUM(runs_scored) >= 20
+        ) AS g
+            ON f.player_id = g.bowler
+    GROUP BY f.player_id
+    ) AS h JOIN player 
+            ON h.player_id = player.player_id
 ORDER BY freq DESC , player_name
 LIMIT 5;
 
