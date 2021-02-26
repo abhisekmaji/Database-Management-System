@@ -73,11 +73,12 @@
  Royal Challengers Bangalore | JH Kallis        |  572
 
 9.
-       team_name       |     opponent_team_name      | number of sixes 
+       team_name       |     opponent_team_name      | number_of_sixes 
 -----------------------+-----------------------------+-----------------
  Chennai Super Kings   | Kings XI Punjab             |              16
  Kings XI Punjab       | Rajasthan Royals            |              14
  Kolkata Knight Riders | Royal Challengers Bangalore |              14
+
 
 10.
     bowling_category    | player_name  | batting_average 
@@ -168,35 +169,36 @@
  Z Khan
 
 14.
- season_year | match_id |          team_name          
--------------+----------+-----------------------------
-        2008 |   336025 | Delhi Daredevils
-        2008 |   336006 | Delhi Daredevils
-        2008 |   336036 | Kings XI Punjab
+ season_year | match_id |      team_name      
+-------------+----------+---------------------
+        2008 |   335994 | Chennai Super Kings
+        2008 |   336018 | Chennai Super Kings
+        2008 |   336044 | Chennai Super Kings
+        2009 |   392219 | Chennai Super Kings
         2009 |   392193 | Deccan Chargers
         2009 |   392194 | Delhi Daredevils
-        2009 |   392215 | Rajasthan Royals
         2010 |   419142 | Chennai Super Kings
-        2010 |   419119 | Mumbai Indians
-        2010 |   419112 | Mumbai Indians
-        2011 |   501217 | Kings XI Punjab
-        2011 |   501265 | Kings XI Punjab
-        2011 |   501215 | Kochi Tuskers Kerala
+        2010 |   419158 | Chennai Super Kings
+        2010 |   419164 | Chennai Super Kings
+        2011 |   501245 | Chennai Super Kings
+        2011 |   501258 | Chennai Super Kings
+        2011 |   501276 | Chennai Super Kings
         2012 |   548347 | Delhi Daredevils
-        2012 |   548372 | Mumbai Indians
-        2012 |   548377 | Royal Challengers Bangalore
+        2012 |   548335 | Chennai Super Kings
+        2012 |   548353 | Deccan Chargers
+        2013 |   598012 | Chennai Super Kings
         2013 |   598031 | Chennai Super Kings
-        2013 |   598050 | Kings XI Punjab
-        2013 |   598052 | Rajasthan Royals
+        2013 |   598056 | Chennai Super Kings
         2014 |   729294 | Delhi Daredevils
-        2014 |   734006 | Mumbai Indians
-        2014 |   729306 | Sunrisers Hyderabad
-        2015 |   829780 | Mumbai Indians
-        2015 |   829824 | Royal Challengers Bangalore
-        2015 |   829800 | Royal Challengers Bangalore
-        2016 |   980990 | Kings XI Punjab
-        2016 |   980976 | Kings XI Punjab
-        2016 |   980912 | Royal Challengers Bangalore
+        2014 |   729288 | Kings XI Punjab
+        2014 |   729296 | Kings XI Punjab
+        2015 |   829716 | Chennai Super Kings
+        2015 |   829730 | Delhi Daredevils
+        2015 |   829736 | Delhi Daredevils
+        2016 |   980926 | Delhi Daredevils
+        2016 |   980956 | Delhi Daredevils
+        2016 |   980950 | Gujarat Lions
+
 
 15.
  season_year | top_batsman  | max_runs | top_bowler  | max_wickets 
