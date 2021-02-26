@@ -239,7 +239,7 @@ FROM
         JOIN player ON player.player_id = m.striker
         JOIN batting_style ON batting_style.batting_id = player.batting_hand
 WHERE batting_style.batting_hand = 'Left-hand bat'
-ORDER BY  m.season_year, m.num_wickets DESC, m.runs DESC, player.player_name;
+ORDER BY m.num_wickets DESC, m.runs DESC, player.player_name, m.season_year;
 
 --12--
 SELECT match_id, player_name, team_name, num_wickets, season_year
