@@ -413,23 +413,27 @@ SELECT player_name
 FROM
     (SELECT f.player_id , COUNT(g.over_id) as freq
     FROM
-        (SELECT player_id , COUNT(team_id) as num_team
-        FROM player_match 
+        (SELECT player_id , COUNT(DISTINCT team_id) as num_team
+        FROM 
+            (SELECT match_id, player_id, team_id 
+            FROM player_match
+            WHERE team_id IS NOT NULL
+            ) as pf
         GROUP BY player_id
-        HAVING COUNT(team_id) >= 3
+        HAVING COUNT(DISTINCT team_id) >= 3
         ) AS f
         JOIN
         (SELECT match_id, over_id , bowler , SUM(runs_scored) as runs_conceeded
         FROM ball_by_ball 
             NATURAL JOIN batsman_scored
         GROUP BY match_id, over_id , bowler 
-        HAVING SUM(runs_scored) >= 20
+        HAVING SUM(runs_scored) > 20
         ) AS g
             ON f.player_id = g.bowler
     GROUP BY f.player_id
     ) AS h JOIN player 
             ON h.player_id = player.player_id
-ORDER BY freq DESC , player_name
+ORDER BY freq DESC , player_name ASC
 LIMIT 5;
 
 --19--
@@ -468,21 +472,16 @@ ORDER BY fi.duck_out DESC , player.player_name
 LIMIT 10;
 
 --21--
-SELECT final.match_id, t1.team_name as team_1_name, t3.team_name as team_2_name, t3.team_name as match_winner_name, final.num_of_boundaries
+SELECT final.match_id, t1.team_name as team_1_name, t2.team_name as team_2_name, t3.team_name as match_winner_name, 
+        final.num_of_boundaries
 FROM
     (SELECT table2.match_id, table1.team_1, table1.team_2, table1.match_winner, table2.num_of_boundaries
-    FROM
-        (SELECT m.match_id, m.team_1, m.team_2, m.match_winner
-        FROM match as m 
-                JOIN win_by as wb on m.win_id = wb.win_id
-        WHERE wb.win_type = 'wickets'
-        )as table1
-        JOIN
+    FROM        
         (SELECT bbb.match_id , bbb.team_batting , COUNT(bs.runs_scored) as num_of_boundaries
         FROM ball_by_ball as bbb NATURAL JOIN batsman_scored as bs
-        WHERE bs.runs_scored IN (4,6) AND innings_no IN (1,2)
+        WHERE bs.runs_scored IN (4,6) AND innings_no = 2
         GROUP BY bbb.match_id , bbb.team_batting
-        )as table2 ON table1.match_id = table2.match_id
+        )as table2 join match as table1 ON table1.match_id = table2.match_id
                     AND table1.match_winner = table2.team_batting
     )as final, team as t1, team as t2, team as t3
 WHERE final.team_1 = t1.team_id
@@ -497,21 +496,20 @@ FROM
     (SELECT ROUND(table1.runs_conceeded/table2.wickets,2) as arc, 
             country.country_name, player.player_name
     FROM
-        (SELECT match.season_id, bbb.bowler, SUM(bs.runs_scored) as runs_conceeded
+        (SELECT bbb.bowler, SUM(bs.runs_scored) as runs_conceeded
         FROM ball_by_ball as bbb NATURAL JOIN batsman_scored as bs
                 JOIN match on match.match_id = bbb.match_id
         WHERE innings_no in (1,2)
-        GROUP BY match.season_id, bbb.bowler
+        GROUP BY bbb.bowler
         )AS table1
         JOIN
-        (SELECT match.season_id, bbb.bowler, COUNT(wt.player_out) as wickets
+        (SELECT bbb.bowler, COUNT(wt.player_out) as wickets
         FROM ball_by_ball as bbb NATURAL JOIN wicket_taken as wt
                 JOIN match on match.match_id = bbb.match_id
         WHERE innings_no in (1,2) AND wt.kind_out NOT IN(3,5,9)
-        GROUP BY match.season_id, bbb.bowler
+        GROUP BY bbb.bowler
         HAVING COUNT(wt.player_out) >0
-        )AS table2 ON table1.season_id = table2.season_id
-                    AND table1.bowler = table2.bowler
+        )AS table2 ON  table1.bowler = table2.bowler
         JOIN player ON player.player_id = table1.bowler
         JOIN country ON player.country_id = country.country_id
     )as foo
