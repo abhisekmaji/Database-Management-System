@@ -193,10 +193,9 @@ WHERE rn=1;
 --11--
 SELECT m.season_year, player.player_name, m.num_wickets, m.runs
 FROM
-    (SELECT h.season_id, h.striker, h.season_year,
-    SUM(runs_match) as runs, sum(wickets_match) as num_wickets, COUNT(h.match_id) 
+    (SELECT h.season_id, h.striker, h.season_year, runs, num_wickets
     FROM
-        (SELECT f.match_id, season_id, season_year, striker, runs_match
+        (SELECT season_id, season_year, striker, sum(runs_match) as runs
         FROM
             (
                 SELECT match_id, striker, SUM(runs_scored) as runs_match
@@ -209,8 +208,10 @@ FROM
                 FROM match NATURAL JOIN season
             ) as g
         WHERE f.match_id = g.match_id
-        ) as h,
-        (SELECT i.match_id, season_id, season_year, bowler, wickets_match
+        GROUP BY season_id, season_year, striker
+        ) as h
+        JOIN
+        (SELECT season_id, season_year, bowler, SUM(wickets_match) as num_wickets
         FROM
             (
                 SELECT match_id, bowler, COUNT(player_out) as wickets_match
@@ -224,10 +225,16 @@ FROM
                 FROM match NATURAL JOIN season
             ) as j
         WHERE i.match_id = j.match_id
-        ) as k
-    WHERE h.match_id = k.match_id and h.striker = k.bowler
-    GROUP BY h.season_id, h.striker, h.season_year
-    HAVING SUM(h.runs_match)>=150 AND sum(k.wickets_match)>=5 AND COUNT(h.match_id)>=10
+        GROUP BY season_id, season_year, bowler
+        ) as k ON h.striker = k.bowler
+                AND h.season_id = k.season_id
+        JOIN
+        (SELECT pm.player_id, match.season_id, COUNT(pm.match_id) as freq
+        FROM player_match as pm JOIN match ON pm.match_id = match.match_id
+        GROUP BY pm.player_id, match.season_id             
+        ) as final ON final.player_id = k.bowler
+                    AND final.season_id = k.season_id
+    WHERE runs>=150 AND num_wickets>=5 AND freq>=10
     ) as m 
         JOIN player ON player.player_id = m.striker
         JOIN batting_style ON batting_style.batting_id = player.batting_hand
