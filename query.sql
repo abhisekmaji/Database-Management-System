@@ -263,7 +263,8 @@ FROM
     WHERE rn = 1
     )as final
 WHERE rnk = 1
-ORDER BY num_wickets DESC, player_name;
+ORDER BY num_wickets DESC, player_name
+LIMIT 1;
 
 --13--
 SELECT player.player_name

@@ -1,4 +1,3 @@
-1.
  match_id |   player_name   |          team_name          | num_wickets 
 ----------+-----------------+-----------------------------+-------------
    980984 | A Zampa         | Rising Pune Supergiants     |           6
@@ -9,13 +8,14 @@
    501226 | Harbhajan Singh | Mumbai Indians              |           5
    501234 | I Sharma        | Deccan Chargers             |           5
    598059 | JD Unadkat      | Royal Challengers Bangalore |           5
-   598070 | JP Faulkner     | Rajasthan Royals            |           5
    598037 | JP Faulkner     | Rajasthan Royals            |           5
+   598070 | JP Faulkner     | Rajasthan Royals            |           5
    336018 | L Balaji        | Chennai Super Kings         |           5
    501256 | MM Patel        | Mumbai Indians              |           5
    548316 | RA Jadeja       | Chennai Super Kings         |           5
    501206 | SL Malinga      | Mumbai Indians              |           5
-   548328 | SP Narine       | Kolkata Knight Riders       |           5 
+   548328 | SP Narine       | Kolkata Knight Riders       |           5
+
 
 2.
  player_name  | num_matches 
@@ -127,17 +127,10 @@
 
 
 12.
- match_id |  player_name  |          team_name          | num_wickets | season_year 
-----------+---------------+-----------------------------+-------------+-------------
-   980984 | A Zampa       | Rising Pune Supergiants     |           6 |        2016
-   336010 | Sohail Tanvir | Rajasthan Royals            |           6 |        2008
-   392187 | A Kumble      | Royal Challengers Bangalore |           5 |        2009
-   598059 | JD Unadkat    | Royal Challengers Bangalore |           5 |        2013
-   501206 | SL Malinga    | Mumbai Indians              |           5 |        2011
-   548328 | SP Narine     | Kolkata Knight Riders       |           5 |        2012
-   829728 | GB Hogg       | Kolkata Knight Riders       |           4 |        2015
-   729308 | MM Sharma     | Chennai Super Kings         |           4 |        2014
-   419146 | SK Warne      | Rajasthan Royals            |           4 |        2010
+ match_id | player_name |        team_name        | num_wickets | season_year 
+----------+-------------+-------------------------+-------------+-------------
+   980984 | A Zampa     | Rising Pune Supergiants |           6 |        2016
+
 
 13.
    player_name   
@@ -263,18 +256,18 @@
  Royal Challengers Bangalore |   142.00
 
 20.
- player_name  | duck_out 
---------------+----------
- PA Patel     |       13
- V Sehwag     |       13
- AC Gilchrist |       12
- G Gambhir    |       11
- DA Warner    |        8
- DR Smith     |        7
- M Vijay      |        7
- BB McCullum  |        6
- JD Ryder     |        6
- RV Uthappa   |        6
+ player_names 
+--------------
+ PA Patel
+ V Sehwag
+ AC Gilchrist
+ G Gambhir
+ DA Warner
+ DR Smith
+ M Vijay
+ BB McCullum
+ JD Ryder
+ RV Uthappa
 
 21.
  match_id |     team_1_name     |     team_2_name     |  match_winner_name  | num_of_boundaries 
