@@ -239,9 +239,9 @@
 -------------
  P Kumar
  DW Steyn
+ AB Dinda
  S Sreesanth
  UT Yadav
- A Mishra
 
 19.
           team_name          | avg_runs 
@@ -270,16 +270,16 @@
  RV Uthappa
 
 21.
- match_id |     team_1_name     |     team_2_name     |  match_winner_name  | num_of_boundaries 
-----------+---------------------+---------------------+---------------------+-------------------
-   733998 | Delhi Daredevils    | Sunrisers Hyderabad | Sunrisers Hyderabad |                 4
-   419160 | Chennai Super Kings | Delhi Daredevils    | Delhi Daredevils    |                 8
-   548330 | Mumbai Indians      | Delhi Daredevils    | Delhi Daredevils    |                 8
+ match_id |      team_1_name      |     team_2_name     |   match_winner_name   | num_of_boundaries 
+----------+-----------------------+---------------------+-----------------------+-------------------
+   733998 | Delhi Daredevils      | Sunrisers Hyderabad | Sunrisers Hyderabad   |                 4
+   501250 | Kolkata Knight Riders | Chennai Super Kings | Kolkata Knight Riders |                 7
+   336030 | Kolkata Knight Riders | Chennai Super Kings | Chennai Super Kings   |                 8
 
 22.
  country_name 
 --------------
  Australia
- Sri Lanka
+ India
  India
 
