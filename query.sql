@@ -9,7 +9,7 @@ FROM
     HAVING COUNT(player_out) >= 5
     ) AS a JOIN player ON player.player_id=a.bowler
             JOIN team ON team.team_id = a.team_bowling
-ORDER BY a.num_wickets DESC, player_name, team_name;
+ORDER BY a.num_wickets DESC, player_name, team_name, match_id;
 
 --2--
 SELECT player_name, a.num_matches
@@ -452,7 +452,7 @@ FROM
 ORDER BY team.team_name, f.avg_runs;
 
 --20--
-SELECT player.player_name , fi.duck_out
+SELECT player.player_name as player_names
 FROM
     (SELECT f.player_out , count(f.match_id) as duck_out
     FROM
