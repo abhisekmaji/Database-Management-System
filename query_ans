@@ -1,0 +1,289 @@
+1.
+ match_id |   player_name   |          team_name          | num_wickets 
+----------+-----------------+-----------------------------+-------------
+   980984 | A Zampa         | Rising Pune Supergiants     |           6
+   336010 | Sohail Tanvir   | Rajasthan Royals            |           6
+   548324 | AD Mascarenhas  | Kings XI Punjab             |           5
+   392187 | A Kumble        | Royal Challengers Bangalore |           5
+   336025 | A Mishra        | Delhi Daredevils            |           5
+   501226 | Harbhajan Singh | Mumbai Indians              |           5
+   501234 | I Sharma        | Deccan Chargers             |           5
+   598059 | JD Unadkat      | Royal Challengers Bangalore |           5
+   598070 | JP Faulkner     | Rajasthan Royals            |           5
+   598037 | JP Faulkner     | Rajasthan Royals            |           5
+   336018 | L Balaji        | Chennai Super Kings         |           5
+   501256 | MM Patel        | Mumbai Indians              |           5
+   548316 | RA Jadeja       | Chennai Super Kings         |           5
+   501206 | SL Malinga      | Mumbai Indians              |           5
+   548328 | SP Narine       | Kolkata Knight Riders       |           5 
+
+2.
+ player_name  | num_matches 
+--------------+-------------
+ Yuvraj Singh |           2
+ A Kumble     |           1
+ A Zampa      |           1
+
+3.
+ player_name 
+-------------
+ NV Ojha
+
+4.
+ season_year |  player_name  | num_matches 
+-------------+---------------+-------------
+        2008 | Sohail Tanvir |          11
+        2009 | RP Singh      |          16
+        2010 | PP Ojha       |          16
+        2011 | SL Malinga    |          16
+        2012 | M Morkel      |          16
+        2013 | DJ Bravo      |          18
+        2014 | MM Sharma     |          16
+        2015 | DJ Bravo      |          17
+        2016 | B Kumar       |          17
+
+5.
+94 rows
+
+6.
+45 rows
+
+7.
+          team_name          
+-----------------------------
+ Delhi Daredevils
+ Deccan Chargers
+ Royal Challengers Bangalore
+ Chennai Super Kings
+ Kings XI Punjab
+ Rajasthan Royals
+ Mumbai Indians
+ Kolkata Knight Riders
+
+8.
+          team_name          |   player_name    | runs 
+-----------------------------+------------------+------
+ Chennai Super Kings         | SK Raina         |  520
+ Deccan Chargers             | A Symonds        |  429
+ Delhi Daredevils            | V Sehwag         |  356
+ Kings XI Punjab             | DPMD Jayawardene |  439
+ Kolkata Knight Riders       | SC Ganguly       |  493
+ Mumbai Indians              | SR Tendulkar     |  617
+ Rajasthan Royals            | NV Ojha          |  377
+ Royal Challengers Bangalore | JH Kallis        |  572
+
+9.
+       team_name       |     opponent_team_name      | number of sixes 
+-----------------------+-----------------------------+-----------------
+ Chennai Super Kings   | Kings XI Punjab             |              16
+ Kings XI Punjab       | Rajasthan Royals            |              14
+ Kolkata Knight Riders | Royal Challengers Bangalore |              14
+
+10.
+    bowling_category    | player_name  | batting_average 
+------------------------+--------------+-----------------
+ Right-arm medium       | ML Hayden    |           34.59
+ Right-arm offbreak     | CH Gayle     |           37.60
+ Right-arm fast-medium  | SR Watson    |           27.99
+ Legbreak googly        | SPD Smith    |           26.19
+ Right-arm medium-fast  | LMP Simmons  |           42.82
+ Slow left-arm orthodox | SE Marsh     |           36.28
+ Slow left-arm chinaman | SM Katich    |           21.55
+ Legbreak               | DA Warner    |           33.73
+ Left-arm medium        | JEC Franklin |           20.06
+
+11.
+ season_year |   player_name   | num_wickets | runs 
+-------------+-----------------+-------------+------
+        2008 | JA Morkel       |          17 |  241
+        2008 | SC Ganguly      |           6 |  349
+        2009 | IK Pathan       |          17 |  196
+        2009 | SK Raina        |           7 |  434
+        2009 | ST Jayasuriya   |           7 |  221
+        2009 | Yuvraj Singh    |           6 |  340
+        2009 | RA Jadeja       |           6 |  295
+        2010 | IK Pathan       |          15 |  276
+        2010 | JA Morkel       |          11 |  198
+        2010 | SK Raina        |           6 |  520
+        2010 | Yuvraj Singh    |           5 |  255
+        2011 | IK Pathan       |          11 |  150
+        2011 | Yuvraj Singh    |           9 |  343
+        2011 | CH Gayle        |           8 |  604
+        2011 | RA Jadeja       |           8 |  283
+        2012 | RA Jadeja       |          12 |  191
+        2012 | IK Pathan       |           8 |  176
+        2012 | JEC Franklin    |           6 |  214
+        2013 | NLTC Perera     |          19 |  233
+        2013 | RA Jadeja       |          13 |  201
+        2013 | Yuvraj Singh    |           6 |  238
+        2014 | Shakib Al Hasan |          11 |  227
+        2014 | Yuvraj Singh    |           5 |  376
+        2015 | AR Patel        |          13 |  206
+        2015 | JP Duminy       |           8 |  414
+        2016 | NLTC Perera     |           9 |  150
+        2016 | RA Jadeja       |           8 |  191
+        2016 | KH Pandya       |           6 |  237
+
+12.
+ match_id |  player_name  |          team_name          | num_wickets | season_year 
+----------+---------------+-----------------------------+-------------+-------------
+   980984 | A Zampa       | Rising Pune Supergiants     |           6 |        2016
+   336010 | Sohail Tanvir | Rajasthan Royals            |           6 |        2008
+   392187 | A Kumble      | Royal Challengers Bangalore |           5 |        2009
+   598059 | JD Unadkat    | Royal Challengers Bangalore |           5 |        2013
+   501206 | SL Malinga    | Mumbai Indians              |           5 |        2011
+   548328 | SP Narine     | Kolkata Knight Riders       |           5 |        2012
+   829728 | GB Hogg       | Kolkata Knight Riders       |           4 |        2015
+   729308 | MM Sharma     | Chennai Super Kings         |           4 |        2014
+   419146 | SK Warne      | Rajasthan Royals            |           4 |        2010
+
+13.
+   player_name   
+-----------------
+ AB de Villiers
+ AB Dinda
+ A Mishra
+ BB McCullum
+ DJ Bravo
+ DS Kulkarni
+ DW Steyn
+ G Gambhir
+ Harbhajan Singh
+ JA Morkel
+ KD Karthik
+ MK Pandey
+ MS Dhoni
+ PA Patel
+ P Kumar
+ PP Chawla
+ R Bhatia
+ RG Sharma
+ R Vinay Kumar
+ RV Uthappa
+ S Dhawan
+ SK Raina
+ V Kohli
+ WP Saha
+ YK Pathan
+ Z Khan
+
+14.
+ season_year | match_id |          team_name          
+-------------+----------+-----------------------------
+        2008 |   336025 | Delhi Daredevils
+        2008 |   336006 | Delhi Daredevils
+        2008 |   336036 | Kings XI Punjab
+        2009 |   392193 | Deccan Chargers
+        2009 |   392194 | Delhi Daredevils
+        2009 |   392215 | Rajasthan Royals
+        2010 |   419142 | Chennai Super Kings
+        2010 |   419119 | Mumbai Indians
+        2010 |   419112 | Mumbai Indians
+        2011 |   501217 | Kings XI Punjab
+        2011 |   501265 | Kings XI Punjab
+        2011 |   501215 | Kochi Tuskers Kerala
+        2012 |   548347 | Delhi Daredevils
+        2012 |   548372 | Mumbai Indians
+        2012 |   548377 | Royal Challengers Bangalore
+        2013 |   598031 | Chennai Super Kings
+        2013 |   598050 | Kings XI Punjab
+        2013 |   598052 | Rajasthan Royals
+        2014 |   729294 | Delhi Daredevils
+        2014 |   734006 | Mumbai Indians
+        2014 |   729306 | Sunrisers Hyderabad
+        2015 |   829780 | Mumbai Indians
+        2015 |   829824 | Royal Challengers Bangalore
+        2015 |   829800 | Royal Challengers Bangalore
+        2016 |   980990 | Kings XI Punjab
+        2016 |   980976 | Kings XI Punjab
+        2016 |   980912 | Royal Challengers Bangalore
+
+15.
+ season_year | top_batsman  | max_runs | top_bowler  | max_wickets 
+-------------+--------------+----------+-------------+-------------
+        2008 | G Gambhir    |      534 | SK Warne    |          19
+        2009 | AC Gilchrist |      495 | A Kumble    |          21
+        2010 | JH Kallis    |      572 | A Kumble    |          17
+        2011 | V Kohli      |      557 | MM Patel    |          22
+        2012 | G Gambhir    |      590 | SP Narine   |          24
+        2013 | CH Gayle     |      708 | JP Faulkner |          28
+        2014 | DR Smith     |      566 | SP Narine   |          21
+        2015 | AM Rahane    |      540 | SL Malinga  |          24
+        2016 | DA Warner    |      848 | YS Chahal   |          21
+
+16.
+       team_name       
+-----------------------
+ Delhi Daredevils
+ Kings XI Punjab
+ Kolkata Knight Riders
+ Rajasthan Royals
+ Chennai Super Kings
+ Mumbai Indians
+
+17.
+          team_name          | player_name  | count 
+-----------------------------+--------------+-------
+ Chennai Super Kings         | SK Raina     |    12
+ Deccan Chargers             | AC Gilchrist |     4
+ Delhi Daredevils            | V Sehwag     |    10
+ Gujarat Lions               | AJ Finch     |     3
+ Kings XI Punjab             | SE Marsh     |     9
+ Kochi Tuskers Kerala        | BB McCullum  |     2
+ Kolkata Knight Riders       | G Gambhir    |     9
+ Mumbai Indians              | RG Sharma    |    10
+ Pune Warriors               | R Sharma     |     2
+ Rajasthan Royals            | AM Rahane    |    10
+ Rising Pune Supergiants     | AB Dinda     |     2
+ Royal Challengers Bangalore | CH Gayle     |    16
+ Sunrisers Hyderabad         | DA Warner    |     9
+
+18.
+ player_name 
+-------------
+ P Kumar
+ DW Steyn
+ S Sreesanth
+ UT Yadav
+ A Mishra
+
+19.
+          team_name          | avg_runs 
+-----------------------------+----------
+ Chennai Super Kings         |   152.06
+ Deccan Chargers             |   140.25
+ Delhi Daredevils            |   144.86
+ Kings XI Punjab             |   153.93
+ Kolkata Knight Riders       |   141.29
+ Mumbai Indians              |   159.50
+ Rajasthan Royals            |   148.00
+ Royal Challengers Bangalore |   142.00
+
+20.
+ player_name  | duck_out 
+--------------+----------
+ PA Patel     |       13
+ V Sehwag     |       13
+ AC Gilchrist |       12
+ G Gambhir    |       11
+ DA Warner    |        8
+ DR Smith     |        7
+ M Vijay      |        7
+ BB McCullum  |        6
+ JD Ryder     |        6
+ RV Uthappa   |        6
+
+21.
+ match_id |     team_1_name     |     team_2_name     |  match_winner_name  | num_of_boundaries 
+----------+---------------------+---------------------+---------------------+-------------------
+   733998 | Delhi Daredevils    | Sunrisers Hyderabad | Sunrisers Hyderabad |                 4
+   419160 | Chennai Super Kings | Delhi Daredevils    | Delhi Daredevils    |                 8
+   548330 | Mumbai Indians      | Delhi Daredevils    | Delhi Daredevils    |                 8
+
+22.
+ country_name 
+--------------
+ Australia
+ Sri Lanka
+ India
+
