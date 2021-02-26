@@ -133,7 +133,7 @@ WHERE rn =1
 ORDER BY team_name, player_name;
 
 --9--
-SELECT a.team_name, b.team_name as opponent_team_name, number_of_sixes as "number of sixes"
+SELECT a.team_name, b.team_name as opponent_team_name, number_of_sixes
 FROM (SELECT team_batting, team_bowling, number_of_sixes
     FROM
         (
@@ -151,7 +151,7 @@ FROM (SELECT team_batting, team_bowling, number_of_sixes
         ) as g ON f.match_id = g.match_id
     ) as h, team as a, team as b
 WHERE h.team_batting = a.team_id AND h.team_bowling = b.team_id
-ORDER BY "number of sixes" DESC, team_name
+ORDER BY number_of_sixes DESC, team_name
 LIMIT 3;
 
 --10--
@@ -286,7 +286,7 @@ SELECT t.season_year, t.match_id, t.team_name
 FROM 
     (SELECT season.season_year , x.match_id , team.team_name , x.req_players,
         row_number() over(
-            partition by season.season_year ORDER BY x.req_players DESC) AS  team_rank
+            partition by season.season_year ORDER BY x.req_players DESC,team.team_name,x.match_id) AS  team_rank
     FROM    
         (SELECT m.season_id , f.match_id , f.team_batting ,
                 COUNT(fifty_plus) as req_players
@@ -311,7 +311,7 @@ FROM
                     AND season.season_id = x.season_id
     ) as t
 WHERE t.team_rank <=3
-ORDER BY t.season_year, t.req_players DESC, t.team_name;
+ORDER BY t.season_year, t.team_rank;
 
 --15--
 SELECT table1.season_year, top_batsman, max_runs, top_bowler, max_wickets
