@@ -1,19 +1,32 @@
 --1--
-with recursive reachable (origin , dest) as
-    (select origin, dest
-    from flights
-    )
+with recursive reachable (origin , dest, carrier) as(
+        select originairportid, destairportid, carrier
+        from flights
     union
-    (select r1.origin, r2.dest
-    from reachable as r1, reachable as r2
-    where r1.dest = r2.from
+        select r1.originairportid, r2.dest, r1.carrier
+        from flights as r1, reachable as r2
+        where r1.destairportid = r2.origin and r2.carrier = r1.carrier
     )
-select dest
-from reachable
-where reachable.origin = 10140;
+select DISTINCT(airports.city) as name
+from reachable join airports on dest= airportid
+where reachable.origin = 1
+order by airports.city;
 
 --2--
-
+with recursive reachable (origin , dest, day) as(
+        select originairportid, destairportid, dayofweek
+        from flights
+    union
+        select r1.originairportid, r2.dest, r2.day
+        from flights as r1, reachable as r2
+        where r1.destairportid = r2.origin
+            and r1.dayofweek = r2.day
+    )
+select *
+from reachable join airports on dest= airportid
+where reachable.origin = 1
+    AND reachable.dest <> 1
+order by name;
 
 --3--
 with recursive reachone (origin , path_, dest) as(
