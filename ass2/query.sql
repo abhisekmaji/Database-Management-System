@@ -159,3 +159,18 @@ HAVING count(distinct a2.city) =    ((select count(distinct city)
 order by name;
 
 --11--
+with recursive incdelay (origin_city, dest_city, delay_) as(
+        select a1.city, a2.city, (flights.departuredelay + flights.arrivaldelay) as delay_
+        from flights join airports as a1 on a1.airportid = flights.originairportid
+                    join airports as a2 on a2.airportid = flights.destairportid
+    union all
+        select
+        from flights join airports as a1 on a1.airportid = flights.originairportid
+                    join airports as a2 on a2.airportid = flights.destairportid
+                    join incdelay on incdelay.dest_city = a1.city
+        where (flights.departuredelay + flights.arrivaldelay) >= incdelay.delay_
+    )
+    select origin_city as name1, dest_city as name2
+    from incdelay
+    where origin_city <> dest_city
+    order by origin_city, dest_city;
