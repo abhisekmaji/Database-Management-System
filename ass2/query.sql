@@ -9,7 +9,7 @@ with recursive reachable (origin , dest, carrier) as(
     )
 select DISTINCT(airports.city) as name
 from reachable join airports on dest= airportid
-where reachable.origin = 1
+where reachable.origin = 10140
 order by airports.city;
 
 --2--
