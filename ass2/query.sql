@@ -38,7 +38,6 @@ select (airports.city) as name
 from reachable join airports on dest= airportid
 where reachable.origin = 10140
 order by airports.city;
-
 --2--
 with recursive reachable (origin , dest, day) as(
         select originairportid, destairportid, dayofweek
@@ -53,7 +52,6 @@ select airports.city as name
 from reachable join airports on dest= airportid
 where reachable.origin = 10140
 order by airports.city;
-
 --3--
 with recursive reachone (origin , path_, dest) as(
         select originairportid, ARRAY[originairportid] as path_, destairportid
@@ -71,7 +69,6 @@ with recursive reachone (origin , path_, dest) as(
     GROUP by airports.city
     HAVING count(r.path_) = 1
     order by airports.city;
-
 --4--
 with recursive longest (origin , path_, length_ , dest) as(
         select originairportid, ARRAY[originairportid] as path_, 1 as length_ , destairportid
@@ -87,7 +84,6 @@ with recursive longest (origin , path_, length_ , dest) as(
     where origin = dest and origin = 10140
     order by length_ desc
     limit 1;    
-
 --5--
 with recursive longest (origin , path_, length_ , dest) as(
         select originairportid, ARRAY[originairportid] as path_, 1 as length_ , destairportid
@@ -103,7 +99,6 @@ with recursive longest (origin , path_, length_ , dest) as(
     where dest = origin
     order by length_ desc
     limit 1;
-
 --6--
 with recursive numpaths (origin_city , path_, dest_city) as(
         select air1.city , ARRAY[air1.city] as path_ , air2.city
@@ -127,7 +122,6 @@ with recursive numpaths (origin_city , path_, dest_city) as(
     select count(path_) as count
     from numpaths
     where dest_city = 'Chicago';
-
 --7--
 with recursive numpaths (origin_city , path_, dest_city) as(
         select air1.city , ARRAY[air1.city] as path_ , air2.city
@@ -149,15 +143,12 @@ with recursive numpaths (origin_city , path_, dest_city) as(
     select count(path_) as count
     from numpaths
     where dest_city = 'Chicago' and 'Washington' = some(path_);
-
 --8--
 (   
     (select air1.city as name1, air2.city as name2
     from airports as air1 , airports as air2
     where air1.airportid <> air2.airportid)
-
     EXCEPT
-
     (with recursive apath (origin_city, dest_city) as(
         select air1.city , air2.city
         from flights join airports as air1 
@@ -178,7 +169,6 @@ with recursive numpaths (origin_city , path_, dest_city) as(
     )
 )
 order by name1, name2;
-
 --9--
 select dayofmonth as day
 from
@@ -188,7 +178,6 @@ from
     where airports.city = 'Albuquerque'
     GROUP by dayofmonth) as table1
 order by delay_ , day;
-
 --10--
 select a1.city as name
 from flights join airports as a1 on a1.airportid = flights.originairportid
@@ -200,7 +189,6 @@ HAVING count(distinct a2.city) =    ((select count(distinct city)
                                     where state = 'New York'
                                     ) - 1)
 order by name;
-
 --11--
 with recursive incdelay (origin_city, dest_city, delay_) as(
         select a1.city, a2.city, (flights.departuredelay + flights.arrivaldelay) as delay_
@@ -309,13 +297,11 @@ with recursive
         select p.author1, p.path_ || ac.author1 , p.depth_ + 1 as depth_, ac.author2
         from authorconnected as ac 
             join AtoB as p on p.author2 = ac.author1
-            join authordetails as ad1 on ad1.authorid = p.author2
-            join authordetails as ad2 on ad2.authorid = ac.author2
         where ac.author1 <> all(p.path_)
     )
     select
     case
-        when 321 in (  select author2
+        when 321 in (  select distinct author2
                         from AtoB) 
             then (  select count(distinct path_) as count
                     from AtoB
