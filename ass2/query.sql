@@ -1,3 +1,16 @@
+--PREAMBLE--
+create view authorconnected as
+    select apl.authorid as author1 , apl2.authorid as author2 , apl1.paperid
+    from authorpaperlist as apl1 join authorpaperlist as apl2
+        on apl1.paperid = apl2.paperid
+    where apl1.authorid <> apl2.authorid
+
+create view allpair as 
+    select ad1.authorid as author1 , ad2.authorid as author2 , 
+        ad1.authorname as author1name, ad2.authorname as author2name
+    from authordetails as ad1 , authordetails as ad2
+    where ad1.authorid <> ad2.authorid
+
 --1--
 with recursive reachable (origin , dest, carrier) as(
         select originairportid, destairportid, carrier
@@ -25,7 +38,7 @@ with recursive reachable (origin , dest, day) as(
 select airports.city as name
 from reachable join airports on dest= airportid
 where reachable.origin = 10140
-order by name;
+order by airports.city;
 
 --3--
 with recursive reachone (origin , path_, dest) as(
@@ -43,7 +56,7 @@ with recursive reachone (origin , path_, dest) as(
         on r.dest = airports.airportid
     GROUP by airports.city
     HAVING count(r.path_) = 1
-    order by name;
+    order by airports.city;
 
 --4--
 with recursive longest (origin , path_, length_ , dest) as(
@@ -206,3 +219,35 @@ with recursive incdelay (origin_city, dest_city, delay_) as(
     from incdelay
     where origin_city <> dest_city
     order by origin_city, dest_city;
+
+--12--
+with recursive AtoB (path_ , depth_ , author) as( 
+        select ARRAY[author1] as path_ , 1 as depth_ , author2
+        from authorconnected as ac join authordetails as ad
+                on ac.author1 = ad.authorid
+        where ad.authorname = 'A'
+    union
+        select p.path_ || ac.author2 , p.depth_ + 1 as depth_, p.author2
+        from authorconnected as ac join AtoB as p
+            on p.author = ac.author1
+        where p.author <> all(p.path_)
+    )
+    (
+        (select author as authorid , depth_ as count
+        from AtoB
+        )
+    union
+        (select ap.author2 as authorid, -1 as count
+        from allpair as ap
+        where ap.author1name = 'A' and ap.author2 not in    (select author
+                                                            from AtoB
+                                                            )
+        )
+    )
+    order by count DESC , authorid;
+
+--13--
+
+
+--CLEANUP--
+drop view authorconnected
