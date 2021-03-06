@@ -7,7 +7,7 @@ with recursive reachable (origin , dest, carrier) as(
         from flights as r1, reachable as r2
         where r1.destairportid = r2.origin and r2.carrier = r1.carrier
     )
-select DISTINCT(airports.city) as name
+select (airports.city) as name
 from reachable join airports on dest= airportid
 where reachable.origin = 10140
 order by airports.city;
@@ -22,21 +22,21 @@ with recursive reachable (origin , dest, day) as(
         where r1.destairportid = r2.origin
             and r1.dayofweek = r2.day
     )
-select *
+select airports.city as name
 from reachable join airports on dest= airportid
-where reachable.origin = 1
-    AND reachable.dest <> 1
+where reachable.origin = 10140
 order by name;
 
 --3--
 with recursive reachone (origin , path_, dest) as(
-        select originairportid, '' as path_, destairportid
+        select originairportid, ARRAY[originairportid] as path_, destairportid
         from flights
         where flights.originairportid = 10140
-    union all
-        select r1.origin, r.path_||','||flights.originairportid as path_, flights.destairportid
+    union
+        select r1.origin, r1.path_ || flights.originairportid as path_, flights.destairportid
         from reachone as r1 JOIN flights 
             on r1.dest = flights.originairportid
+        where flights.originairportid <> all(r1.path_)
     )
     select airports.city as name
     from reachone as r join airports
@@ -46,31 +46,48 @@ with recursive reachone (origin , path_, dest) as(
     order by name;
 
 --4--
-with recursive longest (origin , path_, dest) as(
-        select originairportid, '' as path_, destairportid
+with recursive longest (origin , path_, length_ , dest) as(
+        select originairportid, ARRAY[originairportid] as path_, 1 as length_ , destairportid
         from flights
-        where flights.originairportid = 10140
-    union all
-        select r1.origin, r.path_||','||flights.originairportid as path_, flights.destairportid
+    union
+        select r1.origin, r1.path_ || flights.originairportid as path_, r1.length_ + 1 as length_ ,flights.destairportid
         from longest as r1 JOIN flights 
             on r1.dest = flights.originairportid
+        where flights.originairportid <> all(r1.path_)
     )
-    select ;
+    select length_
+    from longest
+    where 10140 = some(longest.path_) and dest = origin
+    order by length_ desc
+    limit 1;    
 
 --5--
-
+with recursive longest (origin , path_, length_ , dest) as(
+        select originairportid, ARRAY[originairportid] as path_, 1 as length_ , destairportid
+        from flights
+    union
+        select r1.origin, r1.path_ || flights.originairportid as path_, r1.length_ + 1 as length_ ,flights.destairportid
+        from longest as r1 JOIN flights 
+            on r1.dest = flights.originairportid
+        where flights.originairportid <> all(r1.path_)
+    )
+    select length_
+    from longest
+    where dest = origin
+    order by length_ desc
+    limit 1;
 
 --6--
 with recursive numpaths (origin_city , path_, dest_city) as(
-        select air1.city , '' as path_ , air2.city
+        select air1.city , ARRAY[air1.city] as path_ , air2.city
         from flights join airports as air1 on
                 flights.originairportid = air1.airportid
                 join airports as air2 on 
                 flights.destairportid = air2.airportid
         where air1.name = 'Albuquerque'
                 and air1.state <> air2.state
-    union all
-        select np.origin_city, np.path_||','||air1.city as path_, air2.city
+    union
+        select np.origin_city, np.path_ || air1.city as path_, air2.city
         from flights join airports as air1
                 on flights.originairportid = air1.airportid
                     join airports as air2
@@ -78,6 +95,7 @@ with recursive numpaths (origin_city , path_, dest_city) as(
                     join numpaths as np 
                 on np.dest_city = air1.city
         where air1.state <> air2.state
+                and air1.city <> all(np.path_)
     )
     select count(path_) as count
     from numpaths
@@ -85,24 +103,25 @@ with recursive numpaths (origin_city , path_, dest_city) as(
 
 --7--
 with recursive numpaths (origin_city , path_, dest_city) as(
-        select air1.city , '' as path_ , air2.city
+        select air1.city , ARRAY[air1.city] as path_ , air2.city
         from flights join airports as air1 on
                 flights.originairportid = air1.airportid
                 join airports as air2 on 
                 flights.destairportid = air2.airportid
         where air1.name = 'Albuquerque'
-    union all
-        select np.origin_city, np.path_||','||air1.city as path_, air2.city
+    union
+        select np.origin_city, np.path_ || air1.city as path_, air2.city
         from flights join airports as air1
                 on flights.originairportid = air1.airportid
                     join airports as air2
                 on flights.destairportid = air2.airportid 
                     join numpaths as np 
                 on np.dest_city = air1.city
+        where air1.city <> all(np.path_)
     )
     select count(path_) as count
     from numpaths
-    where dest_city = 'Chicago' and path_ LIKE '%Washington%';
+    where dest_city = 'Chicago' and 'Washington' = some(path_);
 
 --8--
 (   
@@ -134,7 +153,7 @@ with recursive numpaths (origin_city , path_, dest_city) as(
                 on flights.originairportid = air1.airportid
                     join airports as air2 
                 on flights.destairportid = air2.airportid
-        union all
+        union
         select ap.origin_city, air2.city
         from flights join airports as air1
                 on flights.originairportid = air1.airportid
@@ -176,8 +195,8 @@ with recursive incdelay (origin_city, dest_city, delay_) as(
         select a1.city, a2.city, (flights.departuredelay + flights.arrivaldelay) as delay_
         from flights join airports as a1 on a1.airportid = flights.originairportid
                     join airports as a2 on a2.airportid = flights.destairportid
-    union all
-        select
+    union
+        select incdelay.origin_city, a2.city, (flights.departuredelay + flights.arrivaldelay) as delay_
         from flights join airports as a1 on a1.airportid = flights.originairportid
                     join airports as a2 on a2.airportid = flights.destairportid
                     join incdelay on incdelay.dest_city = a1.city
