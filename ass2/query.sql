@@ -75,7 +75,7 @@ create view uniontotalcit as
     from authordetails as ads
     where ads.authorid not in (select authorid from totalcit))
     order by authorid;
-/*
+
 --1--
 with recursive reachable (origin , dest, carrier) as(
         select originairportid, destairportid, carrier
@@ -457,7 +457,7 @@ with recursive
                  )
         else -1
     end as count;
-*/
+
 --19--
 with recursive 
     AtoB (author1, path_ , depth_ , city_, paper_, author2) as( 
