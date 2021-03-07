@@ -301,7 +301,7 @@ with recursive
         from authorconnected as ac 
             join AtoB as p on p.author2 = ac.author1
             join authordetails as ad1 on ad1.authorid = p.author2
-        where () and ac.author1 <> all(p.path_)
+        where ac.author1 <> all(p.path_)
     )
     select
     case
