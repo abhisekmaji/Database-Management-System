@@ -287,24 +287,24 @@ with recursive AtoB (path_ , depth_ , author) as(
         where p.author <> all(p.path_)
     )
     (
-        (select authorid , count
+        (select authorid , count as length
         from
             (select author as authorid , depth_ as count , 
                 row_number() over(partition by author order by depth_) as rnk
             from AtoB
-            where author != 1235
+            where author != 1235 and author <> all(path_)
             )as table1
         where rnk = 1
         )
     union
-        (select ap.author2 as authorid, -1 as count
+        (select ap.author2 as authorid, -1 as length
         from allpair as ap
-        where ap.author1 = 1235 and ap.author2 not in    (select author
-                                                            from AtoB
-                                                            )
+        where ap.author1 = 1235 and ap.author2 not in   (select author
+                                                        from AtoB
+                                                        )
         )
     )
-    order by count DESC , authorid;
+    order by length DESC , authorid;
 
 --13-- 
 with recursive 
@@ -330,19 +330,19 @@ with recursive
             join componentsA as ca on ca.author2 = ac.author1
     )
     select
-    case
-        when 2826 in (  select author2
-                        from componentsA) 
-            then (select
-                    case
-                    when 2826 in (select author2 from AtoB) then (select count(distinct path_) as count
-                                                                from AtoB
-                                                                where author2 = 2826 and author2<>all(path_)
-                                                                GROUP by author2 )
-                    else 0
-                    end as count)
-        else -1
-    end as count; 
+        case
+            when 2826 in (  select author2
+                            from componentsA) 
+                then (select
+                        case
+                        when 2826 in (select author2 from AtoB) then (select count(distinct path_) as count
+                                                                    from AtoB
+                                                                    where author2 = 2826 and author2<>all(path_)
+                                                                    GROUP by author2 )
+                        else 0
+                        end as count)
+            else -1
+        end as count; 
 
 --14--
 with recursive 
@@ -407,7 +407,7 @@ with recursive
                     case
                     when 456 in (select author2 from AtoB) then (select count(distinct path_) as count
                                                                 from AtoB
-                                                                where author2 = 456 and 456 <> all(path_)
+                                                                where author2 = 456 and author2 <> all(path_)
                                                                 GROUP by author2 )
                     else 0
                     end as count)
