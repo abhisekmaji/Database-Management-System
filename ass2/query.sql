@@ -276,16 +276,44 @@ with recursive
 
 
 --14--
-/*with recursive components (paper1, paper2) as(
-        select paperid1, paperid2
-        from citationlist
+with recursive 
+    AtoB (author1, path_ , depth_ , cited, author2) as( 
+        select author1 , ARRAY[author1] as path_ , 1 as depth_ , 'false' as cited , author2
+        from authorconnected as ac
+        where author1 = 704
     union
-        select c.paper1 , cl.paperid2
-        from components as c join citationlist as cl 
-                on c.paper2 = cl.paperid1
+        select p.author1, p.path_ || ac.author1 , p.depth_ + 1 as depth_ ,
+            case
+                when cited = 'true' then 'true'
+                when some(select paperid
+                        from authorpaperlist as apl
+                        where apl.authorid = p.author2
+                        ) in    (select paper2 as paper
+                                        from allcit
+                                        where paper1 = 126
+                                        union
+                                        select paper1 as paper
+                                        from allcit
+                                        where paper2 = 126 )as table1
+                                        ) then 'true'                
+                else 'false'
+            end as cited, ac.author2
+        from authorconnected as ac 
+            join AtoB as p on p.author2 = ac.author1
+            join authordetails as ad1 on ad1.authorid = p.author2
+        where () and ac.author1 <> all(p.path_)
     )
-    select *
-    from components;*/
+    select
+    case
+        when 102 in (  select author2
+                        from AtoB) 
+            then (  select count(path_) as count
+                    from AtoB
+                    where author2 = 102 and cited = 'true'
+                    GROUP by author2
+                )
+        else -1
+    end as count;
 
 --18--
 with recursive 
