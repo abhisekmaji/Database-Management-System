@@ -25,16 +25,6 @@ create view authorconnected as
         on apl1.paperid = apl2.paperid
     where apl1.authorid <> apl2.authorid;
 
-create view authorconnected2 as 
-    select distinct *
-    from
-        (select author1,author2
-        from authorconnected
-        union
-        select ac.author2 as author1, ac.author1 as author2
-        from authorconnected as ac) as table1;
-
-
 create view allpair as 
     select ad1.authorid as author1 , ad2.authorid as author2 , 
         ad1.authorname as author1name, ad2.authorname as author2name
@@ -85,7 +75,7 @@ create view uniontotalcit as
     from authordetails as ads
     where ads.authorid not in (select authorid from totalcit))
     order by authorid;
-
+/*
 --1--
 with recursive reachable (origin , dest, carrier) as(
         select originairportid, destairportid, carrier
@@ -467,7 +457,7 @@ with recursive
                  )
         else -1
     end as count;
-
+*/
 --19--
 with recursive 
     AtoB (author1, path_ , depth_ , city_, paper_, author2) as( 
@@ -536,8 +526,7 @@ with recursive
         select ca.author1 , ac.author2
         from authorconnected as ac
             join componentsA as ca on ca.author2 = ac.author1
-    )
-    select
+    )select
     case
         when 321 in (  select author2
                         from componentsA) 
@@ -559,7 +548,6 @@ with recursive
 --CLEANUP--
 drop view delay_day;
 drop view days_;
-drop view authorconnected2;
 drop view authorconnected;
 drop view allpair;
 drop view uniontotalcit;
