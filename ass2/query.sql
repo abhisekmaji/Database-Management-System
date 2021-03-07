@@ -55,17 +55,21 @@ create view allcit as
             select *
             from allcitations) as table_;
 
+create view revcit as 
+    select ac.paper2 as paper1, ac.paper1 as paper2
+    from allcit as ac;
+
 create view allcit2 as
     select distinct *
     from
-        (select paper1,paper2
+        (select *
         from allcit
         union
-        select ac.paper2 as paper1, ac.paper1 as paper2
-        from allcit as ac) as table1;
+        select *
+        from revcit) as table1;
 
 create view totalcit as 
-    select f.authorid, sum(distinct f.count) as total 
+    select f.authorid, sum(f.count) as total 
     from
         (select apl.authorid, ac2.paper1, count(distinct ac2.paper2) as count 
         from authorpaperlist as apl, allcit2 as ac2
@@ -390,6 +394,17 @@ with recursive
             join uniontotalcit as utct on utct.authorid = p.author2
         where ((depth_ = 1) or (depth_>=2 and utct.total>p.totalcitation)) and ac.author1 <> all(p.path_)
     ),
+    AtoBdec (author1, path_ , depth_ , totalcitation, author2) as( 
+        select author1 , ARRAY[author1] as path_ , 1 as depth_ , utct.total as totalcitation, author2
+        from authorconnected as ac join uniontotalcit as utct on utct.authorid = ac.author1
+        where author1 = 1745
+    union
+        select p.author1, p.path_ || ac.author1 , p.depth_ + 1 as depth_ ,utct.total as totalcitation, ac.author2
+        from authorconnected as ac 
+            join AtoBdec as p on p.author2 = ac.author1
+            join uniontotalcit as utct on utct.authorid = p.author2
+        where ((depth_ = 1) or (depth_>=2 and utct.total<p.totalcitation)) and ac.author1 <> all(p.path_)
+    ),
     componentsA (author1, author2) as(
         select author1, author2
         from authorconnected as ac
@@ -405,12 +420,20 @@ with recursive
                         from componentsA) 
             then (select
                     case
-                    when 456 in (select author2 from AtoB) then (select count(distinct path_) as count
+                        when 456 in (select author2 
+                                    from AtoB
+                                    union
+                                    select author2
+                                    from AtoBdec ) then (select count(distinct table1.path_) as count
+                                                        from (  select *
                                                                 from AtoB
-                                                                where author2 = 456 and author2 <> all(path_)
-                                                                GROUP by author2 )
-                    else 0
-                    end as count)
+                                                                union
+                                                                select *
+                                                                from AtoBdec)as table1
+                                                        where table1.author2 = 456 and table1.author2 <> all(table1.path_)
+                                                        GROUP by table1.author2 )
+                        else 0
+                        end as count)
         else -1
     end as count; 
 
@@ -542,4 +565,5 @@ drop view allpair;
 drop view uniontotalcit;
 drop view totalcit;
 drop view allcit2;
+drop view revcit;
 drop view allcit;
