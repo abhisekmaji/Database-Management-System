@@ -1,9 +1,13 @@
 -- \i /home/abhisek/Documents/project/query1.sql
 
-select distinct acquired_object_id 
-from acquisitions
-where acquiring_object_id = 'x'
+select distinct acq.acquired_object_id 
+from acquisitions as acq join
+    (select id
+    from objects
+    where entity_type='Company' and name='x') as cid 
+    on cid.id = acq.acquiring_object_id
 order by acquired_object_id desc;
+
 
 select distinct investor_object_id
 from investments
