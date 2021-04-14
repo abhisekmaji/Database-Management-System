@@ -9,15 +9,15 @@ const int entries = PAGE_CONTENT_SIZE/sizeof(int);
 const int buffer_size = BUFFER_SIZE;
 using namespace std;
 
-void test_case(string inputfile);
+void test_case(char* inputfile);
 void join1(FileHandler &fh1, FileHandler &fh2, FileHandler &fh3);
 void write(PageHandler &ph, FileHandler &fh, int *append, int value,int *pagenum,int* data);
 
 int main(int argc, char** argv){
 
-    string inputfile1 = argv[0];
-    string inputfile2 = argv[1];
-    string outputfile = argv[2];
+    char* inputfile1 = argv[0];
+    char* inputfile2 = argv[1];
+    char* outputfile = argv[2];
     
     FileManager fm;
     
@@ -35,17 +35,20 @@ int main(int argc, char** argv){
     return 0;
 }
 
-void test_case(string inputfile){
-    
-    string input_cases = inputfile + ".txt";
+void test_case(char* inputfile){
+    string input_cases = inputfile;
+    input_cases+=".txt";
+    char* temp;
+    strcpy(temp,input_cases.c_str());
     ifstream readfile(input_cases);
 
     FileManager fm;
     FileHandler fh = fm.CreateFile(inputfile);
     PageHandler ph = fh.NewPage();
-    int* data = (int*)ph.GetData;
-    int pagenumber = ph.GetPageNum;
+    int* data = (int*)ph.GetData();
+    int pagenumber = ph.GetPageNum();
 
+    string text;
     int count = 0;
     while(getline(readfile, text)){
         if(count<entries){
@@ -56,7 +59,7 @@ void test_case(string inputfile){
             fh.MarkDirty(pagenumber);
             fh.UnpinPage(pagenumber);
             ph = fh.NewPage();
-            data = ph.GetData();
+            data = (int*)ph.GetData();
             pagenumber+=1;
             data[0] = stoi(text);
             count=1;
@@ -106,7 +109,7 @@ void join1(FileHandler &fh1, FileHandler &fh2, FileHandler &fh3){
             for(int k=0;k<entries;k++){
                 for(int l=0;l<entries;l++){
                     if(data1[k]=data2[l] && data1[k]!=INT_MIN &&data2[l]!=INT_MIN){
-                        write(ph3,fh3,&start_appending,data1[i],out_pagenum,data3);
+                        write(ph3,fh3,&start_appending,data1[i],&out_pagenum,data3);
                     }
                 }
             }

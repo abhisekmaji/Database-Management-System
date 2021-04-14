@@ -9,21 +9,21 @@ const int entries = PAGE_CONTENT_SIZE/sizeof(int);
 
 using namespace std;
 
-void test_case(string inputfile);
+void test_case(char* inputfile);
 int binary_search_page(FileHandler &fh1, int num);
 void deletion(FileHandler &fh1, int num, FileHandler &fh2);
 void next(int *page_num, int *offset, FileHandler &fh, PageHandler &ph, int num, int* data);
 void write(PageHandler &ph, FileHandler &fh, int *append, int value, int *pagenum, int* data);
 
 int main(int argc, char** argv){
-    string inputfile = argv[0];
-    string query = argv[1];
-    query+=".txt";
+    char* inputfile = argv[0];
+    char* query = argv[1];
     FileManager fm;
     FileHandler fh1 = fm.OpenFile(inputfile);
     
-    ifstream qfile1(query);
-    while (getline(qfile1, text)){
+    string text;
+    ifstream qfile(query);
+    while (getline(qfile, text)){
         deletion(fh1,stoi(text));
     }
     qfile.close();
@@ -31,16 +31,20 @@ int main(int argc, char** argv){
     return 0;
 }
 
-void test_case(string inputfile){
-    string input_cases = inputfile + ".txt";
+void test_case(char* inputfile){
+    string input_cases = inputfile;
+    input_cases+=".txt";
+    char* temp;
+    strcpy(temp,input_cases.c_str());
     ifstream readfile(input_cases);
 
     FileManager fm;
     FileHandler fh = fm.CreateFile(inputfile);
     PageHandler ph = fh.NewPage();
-    int* data = (int*)ph.GetData;
-    int pagenumber = ph.GetPageNum;
+    int* data = (int*)ph.GetData();
+    int pagenumber = ph.GetPageNum();
 
+    string text;
     int count = 0;
     while(getline(readfile, text)){
         if(count<entries){
@@ -51,7 +55,7 @@ void test_case(string inputfile){
             fh.MarkDirty(pagenumber);
             fh.UnpinPage(pagenumber);
             ph = fh.NewPage();
-            data = ph.GetData();
+            data = (int*)ph.GetData();
             pagenumber+=1;
             data[0] = stoi(text);
             count=1;
@@ -88,7 +92,7 @@ void deletion(FileHandler &fh1, int num){
     ph1 = fh1.PageAt(page_p);
     data1 = (int*)ph1.GetData();
     for(int i=0;i<entries;i++){
-        if(num==data[i]){
+        if(num==data1[i]){
             offset_p=i;
             break;
         }
@@ -139,10 +143,10 @@ void deletion(FileHandler &fh1, int num){
 }
 
 void next(int *page_num, int *offset, FileHandler &fh, PageHandler &ph, int num, int* data){
-    while(data[offset]==num){
-        if(offset==entries){            
+    while(data[*offset]==num){
+        if(*offset==entries){            
             fh.UnpinPage(*page_num);
-            ph=fh.NextPage(page_num);
+            ph=fh.NextPage(*page_num);
             *page_num = *page_num + 1;
             *offset=0;
             data = (int*)ph.GetData();

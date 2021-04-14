@@ -12,24 +12,24 @@ using namespace std;
 void test_case(string inputfile);
 void binarysearch(FileHandler &fh1, int num, FileHandler &fh2);
 void search(FileHandler &fh1, int num, FileHandler &fh2);
-void binary_search_page(FileHandler &fh1, int num);
+int binary_search_page(FileHandler &fh1, int num);
 void write(PageHandler &ph, FileHandler &fh, int *append, int value,int *pagenum,int* data);
 
 int main(int argc, char** argv){
-    string inputfile = argv[0];
-    string query = argv[1];
-    query+=".txt";
-    string outputfile = argv[2];
+    char* inputfile = argv[1];
+    char* query = argv[2];
+    char* outputfile = argv[3];
     FileManager fm;
     FileHandler fh1 = fm.OpenFile(inputfile);
     FileHandler fh2 = fm.CreateFile(outputfile);
     PageHandler ph2 = fh2.NewPage();
-    int* data = ph2.GetData();
+    int* data = (int*)ph2.GetData();
     for(int i=0;i<entries;i++){
         data[i]=INT_MIN;
     }
-    ifstream qfile1(query);
-    while (getline(qfile1, text)){
+    string text;
+    ifstream qfile(query);
+    while (getline(qfile, text)){
         search(fh1,stoi(text),fh2);
     }
     qfile.close();
@@ -38,16 +38,20 @@ int main(int argc, char** argv){
     return 0;
 }
 
-void test_case(string inputfile){
-    string input_cases = inputfile + ".txt";
+void test_case(char* inputfile){
+    string input_cases = inputfile;
+    input_cases+=".txt";
+    char* temp;
+    strcpy(temp,input_cases.c_str());
     ifstream readfile(input_cases);
 
     FileManager fm;
     FileHandler fh = fm.CreateFile(inputfile);
     PageHandler ph = fh.NewPage();
-    int* data = (int*)ph.GetData;
-    int pagenumber = ph.GetPageNum;
+    int* data = (int*)ph.GetData();
+    int pagenumber = ph.GetPageNum();
 
+    string text;
     int count = 0;
     while(getline(readfile, text)){
         if(count<entries){
@@ -58,7 +62,7 @@ void test_case(string inputfile){
             fh.MarkDirty(pagenumber);
             fh.UnpinPage(pagenumber);
             ph = fh.NewPage();
-            data = ph.GetData();
+            data = (int*)ph.GetData();
             pagenumber+=1;
             data[0] = stoi(text);
             count=1;

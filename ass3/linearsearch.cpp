@@ -8,26 +8,26 @@
 const int entries = PAGE_CONTENT_SIZE/sizeof(int);
 
 using namespace std;
-void test_case(string inputfile);
+void test_case(char* inputfile);
 void write(PageHandler &ph, FileHandler &fh, int *append, int value,int *pagenum,int* data);
 void linearsearch(FileHandler &fh1, int num, FileHandler &fh2);
 
 
 int main(int argc, char** argv){
-    string inputfile = argv[0];
-    string query = argv[1];
-    query+=".txt";
-    string outputfile = argv[2];
+    char* inputfile = argv[0];
+    char* query = argv[1];
+    char* outputfile = argv[2];
     FileManager fm;
     FileHandler fh1 = fm.OpenFile(inputfile);
     FileHandler fh2 = fm.CreateFile(outputfile);
     PageHandler ph2 = fh2.NewPage();
-    int* data = ph2.GetData();
+    int* data = (int*)ph2.GetData();
     for(int i=0;i<entries;i++){
         data[i]=INT_MIN;
     }
-    ifstream qfile1(query);
-    while (getline(qfile1, text)){
+    string text;
+    ifstream qfile(query);
+    while (getline(qfile, text)){
         linearsearch(fh1,stoi(text),fh2);
     }
     qfile.close();
@@ -36,16 +36,20 @@ int main(int argc, char** argv){
     return 0;
 }
 
-void test_case(string inputfile){
-    string input_cases = inputfile + ".txt";
+void test_case(char* inputfile){
+    string input_cases = inputfile;
+    input_cases+=".txt";
+    char* temp;
+    strcpy(temp,input_cases.c_str());
     ifstream readfile(input_cases);
 
     FileManager fm;
     FileHandler fh = fm.CreateFile(inputfile);
     PageHandler ph = fh.NewPage();
-    int* data = (int*)ph.GetData;
-    int pagenumber = ph.GetPageNum;
+    int* data = (int*)ph.GetData();
+    int pagenumber = ph.GetPageNum();
 
+    string text;
     int count = 0;
     while(getline(readfile, text)){
         if(count<entries){
@@ -56,7 +60,7 @@ void test_case(string inputfile){
             fh.MarkDirty(pagenumber);
             fh.UnpinPage(pagenumber);
             ph = fh.NewPage();
-            data = ph.GetData();
+            data = (int*)ph.GetData();
             pagenumber+=1;
             data[0] = stoi(text);
             count=1;
@@ -100,8 +104,8 @@ void linearsearch(FileHandler &fh1, int num, FileHandler &fh2){
         fh1.UnpinPage(curr);
         if(curr<lastpage){
             ph1 = fh1.NextPage(curr);
-            curr = ph1.GetPageNum;
-            data = ph1.GetData();
+            curr = ph1.GetPageNum();
+            data = (int*)ph1.GetData();
         }
         curr+=1;
     }
