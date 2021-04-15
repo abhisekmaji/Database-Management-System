@@ -15,9 +15,9 @@ void write(PageHandler &ph, FileHandler &fh, int *append, int value,int *pagenum
 
 int main(int argc, char** argv){
 
-    char* inputfile1 = argv[0];
-    char* inputfile2 = argv[1];
-    char* outputfile = argv[2];
+    char* inputfile1 = argv[1];
+    char* inputfile2 = argv[2];
+    char* outputfile = argv[3];
     
     FileManager fm;
     

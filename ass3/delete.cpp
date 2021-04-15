@@ -11,13 +11,13 @@ using namespace std;
 
 void test_case(char* inputfile);
 int binary_search_page(FileHandler &fh1, int num);
-void deletion(FileHandler &fh1, int num, FileHandler &fh2);
+void deletion(FileHandler &fh1, int num);
 void next(int *page_num, int *offset, FileHandler &fh, PageHandler &ph, int num, int* data);
 void write(PageHandler &ph, FileHandler &fh, int *append, int value, int *pagenum, int* data);
 
 int main(int argc, char** argv){
-    char* inputfile = argv[0];
-    char* query = argv[1];
+    char* inputfile = argv[1];
+    char* query = argv[2];
     FileManager fm;
     FileHandler fh1 = fm.OpenFile(inputfile);
     
@@ -203,14 +203,16 @@ void write(PageHandler &ph, FileHandler &fh, int *append, int value, int *pagenu
     if (*append == entries){
         fh.MarkDirty(*pagenum);
         fh.UnpinPage(*pagenum);
+        fh.FlushPage(*pagenum);
         ph=fh.NewPage();
         *pagenum = *pagenum + 1;
         data = (int*)ph.GetData();
         data[0] = value;
+        *append = 1;
     }
     else{
         data[*append]= value;
+        *append = *append + 1;
     }
-    *append = *append + 1;
     return;
 }
