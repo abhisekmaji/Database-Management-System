@@ -13,6 +13,7 @@ void test_case(string inputfile);
 int binary_search_page(FileHandler &fh1, int num);
 void join2(FileHandler &fh1, FileHandler &fh2, FileHandler &fh3);
 void write(PageHandler &ph, FileHandler &fh, int *append, int value,int *pagenum,int* data);
+void print_file(FileHandler &fh, int num);
 
 int main(int argc, char** argv){
 
@@ -26,9 +27,14 @@ int main(int argc, char** argv){
     FileHandler fh2 = fm.OpenFile(inputfile2);
     FileHandler fh3 = fm.CreateFile(outputfile);
     PageHandler ph3 = fh3.NewPage();
+    fh3.UnpinPage(0);
+    fh3.FlushPage(0);
 
+    print_file(fh1,51);
+    print_file(fh2,52);
     join2(fh1,fh2,fh3);
-    
+    print_file(fh3,53);
+
     fm.CloseFile(fh1);
     fm.CloseFile(fh2);
     fm.CloseFile(fh3);
@@ -83,25 +89,26 @@ void join2(FileHandler &fh1, FileHandler &fh2, FileHandler &fh3){
     PageHandler ph2;
     PageHandler ph3;
 
-    int firstpage1=fh1.FirstPage().GetPageNum();
-    int lastpage1=fh1.LastPage().GetPageNum();
+    int firstpage1=0;
+    ph1=fh1.LastPage();
+    int lastpage1=ph1.GetPageNum();
     fh1.FlushPages();
     int* data1;
 
-    int firstpage2=fh2.FirstPage().GetPageNum();
-    int lastpage2=fh2.LastPage().GetPageNum();
+    int firstpage2=0;
+    ph2=fh2.LastPage();
+    int lastpage2=ph2.GetPageNum();
     fh2.FlushPages();
     int* data2;
 
     ph3 = fh3.FirstPage();
     int start_appending = 0;
-    int out_pagenum = ph3.GetPageNum();
+    int out_pagenum = 0;
     int* data3 = (int*)ph3.GetData();
 
     int offset;
     int q;
-    for(int i=firstpage1;i<lastpage1;i++){
-        fh1.FlushPages();
+    for(int i=firstpage1;i<=lastpage1;i++){
         ph1=fh1.PageAt(i);
         data1=(int*)ph1.GetData();
         for(int j=0;j<entries;j++){
@@ -111,24 +118,33 @@ void join2(FileHandler &fh1, FileHandler &fh2, FileHandler &fh3){
                 continue;
             }
             else{
+                ph2=fh2.PageAt(q);
+                data2=(int*)ph2.GetData();
                 while(data2[offset]!=data1[j]){
                     offset++;
                 }
                 while(q<=lastpage2 && data2[offset]==data1[j]){
                     write(ph3,fh3,&start_appending,data1[j],&out_pagenum,data3);
-                    if(offset==entries){
-                        fh2.UnpinPage(q);
-                        ph2=fh2.NextPage(q);
-                        data2=(int*)ph2.GetData();
-                        offset=0;
+                    if(offset==entries-1){
+                        if(q<lastpage2){
+                            fh2.UnpinPage(q);
+                            fh2.FlushPage(q);
+                            ph2=fh2.NextPage(q);
+                            data2=(int*)ph2.GetData();
+                            offset=0;
+                        }
                         q++;
                     }
                     else{
                         offset++;
                     }
                 }
-            }            
+                fh2.UnpinPage(q);
+                fh2.FlushPage(q);
+            }
         }
+        fh1.UnpinPage(i);
+        fh1.FlushPage(i);
     }
     for(int i=start_appending;i<entries;i++){
         data3[i]=INT_MIN;
@@ -142,7 +158,7 @@ void join2(FileHandler &fh1, FileHandler &fh2, FileHandler &fh3){
     return;
 }
 
-void write(PageHandler &ph, FileHandler &fh, int *append, int value,int *pagenum,int* data){
+void write(PageHandler &ph, FileHandler &fh, int *append, int value, int *pagenum, int* data){
     if (*append == entries){
         fh.MarkDirty(*pagenum);
         fh.UnpinPage(*pagenum);
@@ -151,19 +167,55 @@ void write(PageHandler &ph, FileHandler &fh, int *append, int value,int *pagenum
         *pagenum = *pagenum + 1;
         data = (int*)ph.GetData();
         data[0] = value;
+        *append = 1;
     }
     else{
         data[*append]= value;
+        *append = *append + 1;
     }
-    *append = *append + 1;
+    return;
+}
+
+void print_file(FileHandler &fh, int num){
+    PageHandler ph;
+    int* data;
+    ph = fh.LastPage();
+    int lastpage = ph.GetPageNum();
+    fh.UnpinPage(lastpage);
+    fh.FlushPage(lastpage);
+    int curr = 0;
+
+    string out_file = to_string(num);
+    out_file = "./sample/out"+out_file+".txt";
+    ofstream myfile2(out_file);
+    if (myfile2.is_open())
+    {
+        while(curr<=lastpage){
+            ph = fh.PageAt(curr);
+            data = (int*)ph.GetData();
+            //cout<<"---Page---"<<curr<<endl;
+            myfile2<<"---Page---"<<curr<<endl;
+            for(int i = 0; i<entries;i++){
+                //cout<<data[i]<<endl;
+                myfile2<<data[i]<<endl;
+            }
+            fh.UnpinPage(curr);
+            fh.FlushPage(curr);
+            curr++;
+        }        
+        myfile2.close();
+    }    
     return;
 }
 
 int binary_search_page(FileHandler &fh1, int num){
     PageHandler ph1;
     int* data;
-    int firstpage = fh1.FirstPage().GetPageNum();
-    int lastpage = fh1.LastPage().GetPageNum();
+    int firstpage = 0;
+    ph1 = fh1.LastPage();
+    int lastpage = ph1.GetPageNum();
+    fh1.UnpinPage(lastpage);
+    fh1.FlushPage(lastpage);
     
     int mid;
 
@@ -174,24 +226,33 @@ int binary_search_page(FileHandler &fh1, int num){
 
         bool present=false;
         for(int i=0;i<entries;i++){
-            if(data[0]==num){
+            if(data[i]==num){
                 present=true;
                 break;
             }
         }
-        if(num<=data[0]){
-            if(firstpage==lastpage){
-                fh1.UnpinPage(mid);
-                return mid;
+        if(present){
+            if(data[0]==num){
+                if(lastpage==firstpage){
+                    fh1.UnpinPage(mid);
+                    fh1.FlushPage(mid);
+                    return mid;
+                }
+                lastpage=mid;
             }
-            lastpage=mid;
-        }
-        else if(present){
-            fh1.UnpinPage(mid);
-            return mid;
+            else{
+                fh1.UnpinPage(mid);
+                fh1.FlushPage(mid);
+                return mid;
+            }            
         }
         else{
-            firstpage=mid+1;
+            if(num<data[0]){
+                lastpage=mid-1;
+            }
+            else{
+                firstpage=mid+1;
+            }
         }
         fh1.UnpinPage(mid);
         fh1.FlushPage(mid);

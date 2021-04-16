@@ -194,10 +194,10 @@ void print_file(FileHandler &fh, int num){
         while(curr<=lastpage){
             ph = fh.PageAt(curr);
             data = (int*)ph.GetData();
-            cout<<"---Page---"<<curr<<endl;
+            //cout<<"---Page---"<<curr<<endl;
             myfile2<<"---Page---"<<curr<<endl;
             for(int i = 0; i<entries;i++){
-                cout<<data[i]<<endl;
+                //cout<<data[i]<<endl;
                 myfile2<<data[i]<<endl;
             }
             fh.UnpinPage(curr);
