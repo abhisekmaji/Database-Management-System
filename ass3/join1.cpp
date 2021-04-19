@@ -7,12 +7,13 @@
 
 const int entries = PAGE_CONTENT_SIZE/sizeof(int);
 const int buffer_size = BUFFER_SIZE;
+
 using namespace std;
 
 void test_case(char* inputfile);
 void join1(FileHandler &fh1, FileHandler &fh2, FileHandler &fh3);
 void write(PageHandler &ph, FileHandler &fh, int *append, int value,int *pagenum,int* data);
-void print_file(FileHandler &fh, int num);
+// void print_file(FileHandler &fh, int num);
 
 int main(int argc, char** argv){
 
@@ -29,11 +30,12 @@ int main(int argc, char** argv){
     fh3.UnpinPage(0);
     fh3.FlushPage(0);
 
-    print_file(fh1,41);
-    print_file(fh2,42);
+    // print_file(fh1,1);
+    // print_file(fh2,2);
+
     join1(fh1,fh2,fh3);
     
-    print_file(fh3,43);
+    // print_file(fh3,3);
     fm.CloseFile(fh1);
     fm.CloseFile(fh2);
     fm.CloseFile(fh3);
@@ -110,37 +112,5 @@ void write(PageHandler &ph, FileHandler &fh, int *append, int value, int *pagenu
         data[*append]= value;
         *append = *append + 1;
     }
-    return;
-}
-
-void print_file(FileHandler &fh, int num){
-    PageHandler ph;
-    int* data;
-    ph = fh.LastPage();
-    int lastpage = ph.GetPageNum();
-    fh.UnpinPage(lastpage);
-    fh.FlushPage(lastpage);
-    int curr = 0;
-
-    string out_file = to_string(num);
-    out_file = "./sample/out"+out_file+".txt";
-    ofstream myfile2(out_file);
-    if (myfile2.is_open())
-    {
-        while(curr<=lastpage){
-            ph = fh.PageAt(curr);
-            data = (int*)ph.GetData();
-            //cout<<"---Page---"<<curr<<endl;
-            myfile2<<"---Page---"<<curr<<endl;
-            for(int i = 0; i<entries;i++){
-                //cout<<data[i]<<endl;
-                myfile2<<data[i]<<endl;
-            }
-            fh.UnpinPage(curr);
-            fh.FlushPage(curr);
-            curr++;
-        }        
-        myfile2.close();
-    }    
     return;
 }

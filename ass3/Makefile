@@ -1,10 +1,17 @@
 linearobjects = buffer_manager.o file_manager.o linearsearch.o
 binaryobjects = buffer_manager.o file_manager.o binarysearch.o
-deleteobjects = buffer_manager.o file_manager.o delete.o
+deleteobjects = buffer_manager.o file_manager.o deletion.o
 join1objects = buffer_manager.o file_manager.o join1.o
 join2objects = buffer_manager.o file_manager.o join2.o
+sampleobjects = buffer_manager.o file_manager.o sample_run.o
 
-all: linearsearch binarysearch delete join1 join2
+all: linearsearch binarysearch deletion join1 join2
+
+sample_run : $(sampleobjects)
+	     g++ -std=c++11 -o sample_run $(sampleobjects)
+
+sample_run.o : sample_run.cpp
+	g++ -std=c++11 -c sample_run.cpp
 
 linearsearch : $(linearobjects)
 	     g++ -std=c++11 -o linearsearch $(linearobjects)
@@ -18,11 +25,11 @@ binarysearch : $(binaryobjects)
 binarysearch.o : binarysearch.cpp
 	g++ -std=c++11 -c binarysearch.cpp
 
-delete : $(deleteobjects)
-	     g++ -std=c++11 -o delete $(deleteobjects)
+deletion : $(deleteobjects)
+	     g++ -std=c++11 -o deletion $(deleteobjects)
 
-delete.o : delete.cpp
-	g++ -std=c++11 -c delete.cpp
+deletion.o : deletion.cpp
+	g++ -std=c++11 -c deletion.cpp
 
 join1 : $(join1objects)
 	     g++ -std=c++11 -o join1 $(join1objects)
@@ -46,6 +53,7 @@ clean :
 	rm -f *.o
 	rm -f linearsearch || true
 	rm -f binarysearch || true
-	rm -f delete || true
+	rm -f deletion || true
 	rm -f join1 || true
 	rm -f join2 || true
+	rm -f sample_run || true

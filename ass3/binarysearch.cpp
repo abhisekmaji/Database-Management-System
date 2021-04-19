@@ -9,11 +9,11 @@ const int entries = PAGE_CONTENT_SIZE/sizeof(int);
 
 using namespace std;
 
-//void test_case(string inputfile);
+
 void search(FileHandler &fh1, int num, FileHandler &fh2);
-int binary_search_page(FileHandler &fh1, int num);
+int binary_search_page(FileHandler &fh1, int num, int lastpage);
 void write(PageHandler &ph, FileHandler &fh, int *append, int value,int *pagenum,int* data);
-void print_file(FileHandler &fh, int num);
+// void print_file(FileHandler &fh, int num);
 
 int main(int argc, char** argv){
 
@@ -42,8 +42,8 @@ int main(int argc, char** argv){
         search(fh1,stoi(words),fh2);
     }
     qfile.close();
-    print_file(fh1,3);
-    print_file(fh2,4);
+    // print_file(fh1,1);
+    // print_file(fh2,2);
     fm.CloseFile(fh1);
     fm.CloseFile(fh2);
     return 0;
@@ -70,8 +70,8 @@ void search(FileHandler &fh1, int num, FileHandler &fh2){
     
     int mid;
     bool present=true;
-    int curr = binary_search_page(fh1,num);
-    cout<<curr<<endl;
+    int curr = binary_search_page(fh1,num,lastpage);
+    // cout<<curr<<endl;
     
     if(curr!=-1){
         while(present && curr<=lastpage){
@@ -106,14 +106,10 @@ void search(FileHandler &fh1, int num, FileHandler &fh2){
     return;
 }
 
-int binary_search_page(FileHandler &fh1, int num){
+int binary_search_page(FileHandler &fh1, int num, int lastpage){
     PageHandler ph1;
     int* data;
     int firstpage = 0;
-    ph1 = fh1.LastPage();
-    int lastpage = ph1.GetPageNum();
-    fh1.UnpinPage(lastpage);
-    fh1.FlushPage(lastpage);
     
     int mid;
 
@@ -174,37 +170,5 @@ void write(PageHandler &ph, FileHandler &fh, int *append, int value, int *pagenu
         data[*append]= value;
         *append = *append + 1;
     }
-    return;
-}
-
-void print_file(FileHandler &fh, int num){
-    PageHandler ph;
-    int* data;
-    ph = fh.LastPage();
-    int lastpage = ph.GetPageNum();
-    fh.UnpinPage(lastpage);
-    fh.FlushPage(lastpage);
-    int curr = 0;
-
-    string out_file = to_string(num);
-    out_file = "./sample/out"+out_file+".txt";
-    ofstream myfile2(out_file);
-    if (myfile2.is_open())
-    {
-        while(curr<=lastpage){
-            ph = fh.PageAt(curr);
-            data = (int*)ph.GetData();
-            //cout<<"---Page---"<<curr<<endl;
-            myfile2<<"---Page---"<<curr<<endl;
-            for(int i = 0; i<entries;i++){
-                //cout<<data[i]<<endl;
-                myfile2<<data[i]<<endl;
-            }
-            fh.UnpinPage(curr);
-            fh.FlushPage(curr);
-            curr++;
-        }        
-        myfile2.close();
-    }    
     return;
 }

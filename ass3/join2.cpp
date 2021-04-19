@@ -7,13 +7,14 @@
 
 const int entries = PAGE_CONTENT_SIZE/sizeof(int);
 const int buffer_size = BUFFER_SIZE;
+
 using namespace std;
 
-void test_case(string inputfile);
-int binary_search_page(FileHandler &fh1, int num);
+
+int binary_search_page(FileHandler &fh1, int num, int lastpage);
 void join2(FileHandler &fh1, FileHandler &fh2, FileHandler &fh3);
 void write(PageHandler &ph, FileHandler &fh, int *append, int value,int *pagenum,int* data);
-void print_file(FileHandler &fh, int num);
+// void print_file(FileHandler &fh, int num);
 
 int main(int argc, char** argv){
 
@@ -30,58 +31,18 @@ int main(int argc, char** argv){
     fh3.UnpinPage(0);
     fh3.FlushPage(0);
 
-    print_file(fh1,51);
-    print_file(fh2,52);
+    // print_file(fh1,1);
+    // print_file(fh2,2);
+    
     join2(fh1,fh2,fh3);
-    print_file(fh3,53);
+    
+    // print_file(fh3,3);
 
     fm.CloseFile(fh1);
     fm.CloseFile(fh2);
     fm.CloseFile(fh3);
 
     return 0;
-}
-
-void test_case(char* inputfile){
-    string input_cases = inputfile;
-    input_cases+=".txt";
-    char* temp;
-    strcpy(temp,input_cases.c_str());
-    ifstream readfile(input_cases);
-
-    FileManager fm;
-    FileHandler fh = fm.CreateFile(inputfile);
-    PageHandler ph = fh.NewPage();
-    int* data = (int*)ph.GetData();
-    int pagenumber = ph.GetPageNum();
-
-    string text;
-    int count = 0;
-    while(getline(readfile, text)){
-        if(count<entries){
-            data[count] = stoi(text);
-            count+=1;
-        }
-        else{
-            fh.MarkDirty(pagenumber);
-            fh.UnpinPage(pagenumber);
-            ph = fh.NewPage();
-            data = (int*)ph.GetData();
-            pagenumber+=1;
-            data[0] = stoi(text);
-            count=1;
-        }
-    }
-    readfile.close();
-    while(count<entries){
-        data[count]=INT_MIN;
-        count+=1;
-    }
-    fh.MarkDirty(pagenumber);
-    fh.UnpinPage(pagenumber);
-    fh.FlushPages();
-    fm.CloseFile(fh);
-    return;
 }
 
 void join2(FileHandler &fh1, FileHandler &fh2, FileHandler &fh3){
@@ -113,7 +74,7 @@ void join2(FileHandler &fh1, FileHandler &fh2, FileHandler &fh3){
         data1=(int*)ph1.GetData();
         for(int j=0;j<entries;j++){
             offset=0;
-            q=binary_search_page(fh2,data1[j]);
+            q=binary_search_page(fh2,data1[j],lastpage2);
             if(q==-1){
                 continue;
             }
@@ -176,46 +137,10 @@ void write(PageHandler &ph, FileHandler &fh, int *append, int value, int *pagenu
     return;
 }
 
-void print_file(FileHandler &fh, int num){
-    PageHandler ph;
-    int* data;
-    ph = fh.LastPage();
-    int lastpage = ph.GetPageNum();
-    fh.UnpinPage(lastpage);
-    fh.FlushPage(lastpage);
-    int curr = 0;
-
-    string out_file = to_string(num);
-    out_file = "./sample/out"+out_file+".txt";
-    ofstream myfile2(out_file);
-    if (myfile2.is_open())
-    {
-        while(curr<=lastpage){
-            ph = fh.PageAt(curr);
-            data = (int*)ph.GetData();
-            //cout<<"---Page---"<<curr<<endl;
-            myfile2<<"---Page---"<<curr<<endl;
-            for(int i = 0; i<entries;i++){
-                //cout<<data[i]<<endl;
-                myfile2<<data[i]<<endl;
-            }
-            fh.UnpinPage(curr);
-            fh.FlushPage(curr);
-            curr++;
-        }        
-        myfile2.close();
-    }    
-    return;
-}
-
-int binary_search_page(FileHandler &fh1, int num){
+int binary_search_page(FileHandler &fh1, int num, int lastpage){
     PageHandler ph1;
     int* data;
     int firstpage = 0;
-    ph1 = fh1.LastPage();
-    int lastpage = ph1.GetPageNum();
-    fh1.UnpinPage(lastpage);
-    fh1.FlushPage(lastpage);
     
     int mid;
 
